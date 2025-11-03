@@ -189,17 +189,44 @@ class _SwipeToActionButtonState extends State<SwipeToActionButton>
                   );
                 },
               ),
-              // Centered text
-              Center(
-                child: IgnorePointer(
-                  child: Text(
-                    widget.text,
-                    style: TextStyle(
-                      color: widget.textColor,
-                      fontWeight: FontWeight.w600,
+              // Centered text with adaptive padding and fade-out as knob moves
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final max = _maxDrag(constraints.maxWidth);
+                  final progress =
+                      max <= 0 ? 0.0 : (_dragX + _knobSize) / (max + _knobSize);
+                  final safePad =
+                      (_knobSize / 2) +
+                      8; // keep text away from knob on small widths
+                  var opacity = 1.0 - (progress * 1.2);
+                  if (opacity < 0) opacity = 0;
+                  if (opacity > 1) opacity = 1;
+
+                  return Align(
+                    alignment: Alignment.centerRight,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 50),
+                      opacity: opacity,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: safePad),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: IgnorePointer(
+                            child: Text(
+                              widget.text,
+                              maxLines: 1,
+                              softWrap: false,
+                              style: TextStyle(
+                                color: widget.textColor,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
               // Draggable knob
               Positioned(

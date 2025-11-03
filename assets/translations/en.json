@@ -40,5 +40,12 @@
     "swipeToNext": "Next",
     "getStarted": "Get Started",
     "navigateToLogin": "Navigating to login..."
+  },
+  "auth": {
+    "landing": {
+      "tagline": "Smart money, simple life.",
+      "login": "Login",
+      "signup": "Sign Up"
+    }
   }
 }

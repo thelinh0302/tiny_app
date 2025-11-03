@@ -25,9 +25,13 @@ class PrimaryButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: isDisabled || isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
+        elevation: 0,
         backgroundColor: AppColors.mainGreen,
         foregroundColor: AppColors.lettersAndIcons,
         minimumSize: AppSizes.buttonSizeMedium,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusExtraLarge),
+        ),
       ),
       child:
           isLoading
@@ -45,10 +49,22 @@ class PrimaryButton extends StatelessWidget {
                 children: [
                   Icon(icon),
                   AppSpacing.horizontalSpaceSmall,
-                  Text(text),
+                  Text(
+                    text,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               )
-              : Text(text),
+              : Text(
+                text,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
     );
   }
 }
@@ -78,9 +94,12 @@ class OutlineButton extends StatelessWidget {
         foregroundColor: AppColors.mainGreen,
         side: const BorderSide(
           color: AppColors.borderButtonPrimary,
-          width: AppSizes.borderWidthMedium,
+          width: AppSizes.borderWidthThin,
         ),
         minimumSize: AppSizes.buttonSizeMedium,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusExtraLarge),
+        ),
       ),
       child:
           isLoading
@@ -100,10 +119,22 @@ class OutlineButton extends StatelessWidget {
                 children: [
                   Icon(icon),
                   AppSpacing.horizontalSpaceSmall,
-                  Text(text),
+                  Text(
+                    text,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               )
-              : Text(text),
+              : Text(
+                text,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
     );
   }
 }

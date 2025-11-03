@@ -1,3 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:finly_app/core/constants/app_images.dart';
+import 'package:finly_app/core/constants/app_spacing.dart';
+import 'package:finly_app/core/theme/app_colors.dart';
+import 'package:finly_app/core/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -12,103 +17,46 @@ class AuthLandingPage extends StatelessWidget {
     Modular.to.navigate('/auth/signup');
   }
 
-  void _socialLogin(BuildContext context, String provider) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Social login with $provider not implemented')),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Welcome')),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
+            constraints: const BoxConstraints(maxWidth: 400),
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.horizontalMedium,
+              ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                // mainAxisSize: MainAxisSize.min,
                 children: [
-                  const SizedBox(height: 24),
+                  AppImages.image(AppImages.primaryLogo, height: 270),
                   Text(
-                    'Get started',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                    'auth.landing.tagline'.tr(),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppColors.textPrimary,
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 32),
+                  AppSpacing.verticalSpaceLarge,
 
                   // Login / Sign up buttons
                   SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: PrimaryButton(
+                      text: 'auth.landing.login'.tr(),
                       onPressed: _goLogin,
-                      child: const Text('Log in'),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  AppSpacing.verticalSpaceSmall,
                   SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: OutlineButton(
+                      text: 'auth.landing.signup'.tr(),
                       onPressed: _goSignup,
-                      child: const Text('Create account'),
                     ),
                   ),
-
-                  const SizedBox(height: 24),
-
-                  // Divider
-                  Row(
-                    children: [
-                      Expanded(child: Divider(color: theme.dividerColor)),
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Text('or continue with'),
-                      ),
-                      Expanded(child: Divider(color: theme.dividerColor)),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Social buttons (placeholders)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _socialLogin(context, 'Google'),
-                          icon: const Icon(Icons.g_mobiledata, size: 24),
-                          label: const Text('Google'),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _socialLogin(context, 'Apple'),
-                          icon: const Icon(Icons.apple, size: 20),
-                          label: const Text('Apple'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () => _socialLogin(context, 'Facebook'),
-                          icon: const Icon(Icons.facebook, size: 20),
-                          label: const Text('Facebook'),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 24),
                 ],
               ),
             ),

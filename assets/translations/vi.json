@@ -40,5 +40,12 @@
     "swipeToNext": "Tiếp tục",
     "getStarted": "Bắt đầu",
     "navigateToLogin": "Đang chuyển đến đăng nhập..."
+  },
+  "auth": {
+    "landing": {
+      "tagline": "Tiền thông minh, cuộc sống đơn giản.",
+      "login": "Đăng nhập",
+      "signup": "Đăng ký"
+    }
   }
 }
