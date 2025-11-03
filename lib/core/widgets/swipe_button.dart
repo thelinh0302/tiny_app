@@ -51,8 +51,8 @@ class _SwipeToActionButtonState extends State<SwipeToActionButton>
   bool _completed = false;
 
   // Idle animation (breathing) for knob when at rest
-  late final AnimationController _idleCtrl;
-  late final Animation<double> _idleScale;
+  AnimationController? _idleCtrl;
+  Animation<double>? _idleScale;
 
   double get _knobSize => widget.height - (widget.padding.vertical);
   double _maxDrag(double trackWidth) =>
@@ -60,8 +60,8 @@ class _SwipeToActionButtonState extends State<SwipeToActionButton>
 
   void _onPanStart(DragStartDetails d) {
     if (_completed) return;
-    if (_idleCtrl.isAnimating) {
-      _idleCtrl.stop();
+    if (_idleCtrl?.isAnimating ?? false) {
+      _idleCtrl!.stop();
     }
   }
 
@@ -121,7 +121,7 @@ class _SwipeToActionButtonState extends State<SwipeToActionButton>
     }
     // restart idle animation when knob returns to start and not completed
     if (!_completed && _dragX <= 0) {
-      _idleCtrl.repeat(reverse: true);
+      _idleCtrl?.repeat(reverse: true);
     }
   }
 
@@ -135,12 +135,12 @@ class _SwipeToActionButtonState extends State<SwipeToActionButton>
     _idleScale = Tween<double>(
       begin: 1.0,
       end: 1.06,
-    ).animate(CurvedAnimation(parent: _idleCtrl, curve: Curves.easeInOut));
+    ).animate(CurvedAnimation(parent: _idleCtrl!, curve: Curves.easeInOut));
   }
 
   @override
   void dispose() {
-    _idleCtrl.dispose();
+    _idleCtrl?.dispose();
     super.dispose();
   }
 
@@ -205,7 +205,8 @@ class _SwipeToActionButtonState extends State<SwipeToActionButton>
               Positioned(
                 left: widget.padding.left + _dragX,
                 child: ScaleTransition(
-                  scale: _idleScale,
+                  scale:
+                      _idleScale ?? const AlwaysStoppedAnimation<double>(1.0),
                   child: Container(
                     width: _knobSize,
                     height: _knobSize,
