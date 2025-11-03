@@ -1,0 +1,31 @@
+{
+  "app": {
+    "title": "Kiến Trúc Sạch + Modular",
+    "welcome": "Chào mừng! Nhấn nút để tải danh sách người dùng."
+  },
+  "users": {
+    "title": "Người dùng",
+    "loading": "Đang tải người dùng...",
+    "error": "Lỗi: {message}",
+    "retry": "Thử lại",
+    "refresh": "Làm mới",
+    "email": "Email",
+    "username": "Tên đăng nhập",
+    "id": "Mã số"
+  },
+  "language": {
+    "select": "Chọn ngôn ngữ",
+    "english": "Tiếng Anh",
+    "vietnamese": "Tiếng Việt",
+    "changed": "Đã thay đổi ngôn ngữ thành công"
+  },
+  "errors": {
+    "server": "Đã xảy ra lỗi máy chủ",
+    "network": "Đã xảy ra lỗi mạng",
+    "cache": "Đã xảy ra lỗi bộ nhớ đệm",
+    "validation": "Đã xảy ra lỗi xác thực",
+    "timeout": "Hết thời gian kết nối",
+    "noInternet": "Không có kết nối internet",
+    "unexpected": "Đã xảy ra lỗi không mong muốn"
+  }
+}
