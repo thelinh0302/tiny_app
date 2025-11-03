@@ -27,5 +27,18 @@
     "timeout": "Hết thời gian kết nối",
     "noInternet": "Không có kết nối internet",
     "unexpected": "Đã xảy ra lỗi không mong muốn"
+  },
+  "onboarding": {
+    "page1": {
+      "title": "Chào mừng đến Finly",
+      "description": "Quản lý tài chính dễ dàng và an toàn"
+    },
+    "page2": {
+      "title": "Bắt đầu",
+      "description": "Tham gia với chúng tôi ngay hôm nay và kiểm soát tương lai tài chính của bạn"
+    },
+    "swipeToNext": "Tiếp tục",
+    "getStarted": "Bắt đầu",
+    "navigateToLogin": "Đang chuyển đến đăng nhập..."
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter_modular/flutter_modular.dart';
 import 'core/network/dio_client.dart';
+import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/user/user_module.dart';
 
 /// Main application module using Flutter Modular
@@ -13,7 +14,10 @@ class AppModule extends Module {
 
   @override
   void routes(RouteManager r) {
+    // Onboarding route
+    r.child('/', child: (context) => const OnboardingPage());
+
     // User feature module
-    r.module('/', module: UserModule());
+    r.module('/onboarding', module: UserModule());
   }
 }

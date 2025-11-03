@@ -27,5 +27,18 @@
     "timeout": "Connection timeout",
     "noInternet": "No internet connection",
     "unexpected": "Unexpected error occurred"
+  },
+  "onboarding": {
+    "page1": {
+      "title": "Welcome to Finly",
+      "description": "Manage your finances easily and securely"
+    },
+    "page2": {
+      "title": "Get Started",
+      "description": "Join us today and take control of your financial future"
+    },
+    "swipeToNext": "Next",
+    "getStarted": "Get Started",
+    "navigateToLogin": "Navigating to login..."
   }
 }

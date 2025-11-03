@@ -23,7 +23,7 @@ class AppSizes {
   // Button heights
   static const double buttonHeightSmall = 36.0;
   static const double buttonHeightMedium = 48.0;
-  static const double buttonHeightLarge = 56.0;
+  static const double buttonHeightLarge = 66.0;
 
   // Button minimum widths
   static const double buttonMinWidth = 120.0;
