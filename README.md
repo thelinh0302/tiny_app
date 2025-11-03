@@ -128,7 +128,7 @@ Centralized dependency injection using GetIt:
 | **flutter_bloc** | State management |
 | **equatable** | Value equality comparison |
 | **dartz** | Functional programming (Either, Option) |
-| **get_it** | Dependency injection |
+| **flutter_modular** | Dependency injection |
 | **http** | HTTP client |
 | **json_annotation** | JSON serialization annotations |
 | **build_runner** | Code generation |
