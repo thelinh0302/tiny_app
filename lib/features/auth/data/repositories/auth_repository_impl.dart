@@ -22,4 +22,30 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure('Unexpected error: ${e.toString()}'));
     }
   }
+
+  @override
+  Future<Either<Failure, bool>> signup({
+    required String fullName,
+    required String email,
+    required String mobile,
+    required DateTime dob,
+    required String password,
+  }) async {
+    try {
+      final ok = await remote.signup(
+        fullName: fullName,
+        email: email,
+        mobile: mobile,
+        dob: dob,
+        password: password,
+      );
+      return Right(ok);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure('Unexpected error: ${e.toString()}'));
+    }
+  }
 }

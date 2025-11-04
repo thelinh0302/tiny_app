@@ -6,10 +6,12 @@ import 'presentation/pages/auth_landing_page.dart';
 import 'presentation/pages/login_page.dart';
 import 'presentation/pages/signup_page.dart';
 import 'presentation/bloc/login_bloc.dart';
+import 'presentation/bloc/signup_bloc.dart';
 
 // Domain
 import 'domain/repositories/auth_repository.dart';
 import 'domain/usecases/login.dart';
+import 'domain/usecases/signup.dart';
 
 // Data
 import 'data/datasources/auth_remote_data_source.dart';
@@ -31,9 +33,11 @@ class AuthModule extends Module {
 
     // Use case
     i.addLazySingleton<Login>(() => Login(i.get<AuthRepository>()));
+    i.addLazySingleton<Signup>(() => Signup(i.get<AuthRepository>()));
 
     // Bloc
-    i.addLazySingleton<LoginBloc>(() => LoginBloc(login: i.get<Login>()));
+    i.add<LoginBloc>(() => LoginBloc(login: i.get<Login>()));
+    i.add<SignupBloc>(() => SignupBloc(signup: i.get<Signup>()));
   }
 
   @override

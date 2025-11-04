@@ -59,6 +59,41 @@
         "passwordRequired": "Mật khẩu là bắt buộc",
         "passwordTooShort": "Mật khẩu quá ngắn"
       }
+    },
+    "signup": {
+      "labels": {
+        "fullName": "Họ và tên",
+        "email": "Email",
+        "mobile": "Số điện thoại",
+        "dob": "Ngày sinh",
+        "password": "Mật khẩu",
+        "confirmPassword": "Xác nhận mật khẩu"
+      },
+      "validation": {
+        "fullNameRequired": "Họ và tên là bắt buộc",
+        "emailRequired": "Email là bắt buộc",
+        "emailInvalid": "Email không hợp lệ",
+        "mobileRequired": "Số điện thoại là bắt buộc",
+        "mobileInvalid": "Số điện thoại không hợp lệ",
+        "dobRequired": "Ngày sinh là bắt buộc",
+        "passwordRequired": "Mật khẩu là bắt buộc",
+        "passwordTooShort": "Mật khẩu quá ngắn",
+        "confirmRequired": "Vui lòng xác nhận mật khẩu",
+        "passwordsMismatch": "Mật khẩu không khớp"
+      },
+      "messages": {
+        "accountCreated": "Tạo tài khoản thành công. Vui lòng đăng nhập.",
+        "error": "Lỗi: {message}"
+      },
+      "consent": {
+        "prefix": "Bằng cách tiếp tục, bạn đồng ý với ",
+        "terms": "Điều khoản Sử dụng",
+        "and": " và ",
+        "privacy": "Chính sách Quyền riêng tư",
+        "suffix": ".",
+        "openTerms": "Mở Điều khoản Sử dụng",
+        "openPrivacy": "Mở Chính sách Quyền riêng tư"
+      }
     }
   }
 }

@@ -15,6 +15,19 @@ class AuthService {
     return true;
   }
 
+  Future<bool> signup({
+    required String fullName,
+    required String email,
+    required String mobile,
+    required DateTime dob,
+    required String password,
+  }) async {
+    // TODO: integrate real signup
+    await Future.delayed(const Duration(milliseconds: 500));
+    // Do not change login state here. Just simulate account creation.
+    return true;
+  }
+
   Future<void> logout() async {
     await Future.delayed(const Duration(milliseconds: 200));
     _isLoggedIn.value = false;

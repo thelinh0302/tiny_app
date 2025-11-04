@@ -45,7 +45,7 @@
     "landing": {
       "tagline": "Smart money, simple life.",
       "login": "Login",
-      "signup": "Sign Up"
+      "signup": "Create Account"
     },
     "login": {
       "title": "Welcome",
@@ -58,6 +58,41 @@
         "emailInvalid": "Invalid email",
         "passwordRequired": "Password is required",
         "passwordTooShort": "Password too short"
+      }
+    },
+    "signup": {
+      "labels": {
+        "fullName": "Full name",
+        "email": "Email",
+        "mobile": "Mobile number",
+        "dob": "Date of Birth",
+        "password": "Password",
+        "confirmPassword": "Confirm password"
+      },
+      "validation": {
+        "fullNameRequired": "Full name is required",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email",
+        "mobileRequired": "Mobile number is required",
+        "mobileInvalid": "Invalid mobile number",
+        "dobRequired": "Date of Birth is required",
+        "passwordRequired": "Password is required",
+        "passwordTooShort": "Password too short",
+        "confirmRequired": "Confirm your password",
+        "passwordsMismatch": "Passwords do not match"
+      },
+      "messages": {
+        "accountCreated": "Account created. Please log in.",
+        "error": "Error: {message}"
+      },
+      "consent": {
+        "prefix": "By continuing, you agree to ",
+        "terms": "Terms of Use",
+        "and": " and ",
+        "privacy": "Privacy Policy",
+        "suffix": ".",
+        "openTerms": "Open Terms of Use",
+        "openPrivacy": "Open Privacy Policy"
       }
     }
   }

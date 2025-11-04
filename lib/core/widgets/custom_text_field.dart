@@ -20,6 +20,8 @@ class CustomTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final String? errorText;
   final EdgeInsetsGeometry contentPadding;
+  final bool readOnly;
+  final VoidCallback? onTap;
 
   const CustomTextField({
     super.key,
@@ -38,6 +40,8 @@ class CustomTextField extends StatelessWidget {
     this.minLines,
     this.onChanged,
     this.errorText,
+    this.readOnly = false,
+    this.onTap,
     this.contentPadding = const EdgeInsets.symmetric(
       horizontal: 12,
       vertical: 12,
@@ -67,6 +71,8 @@ class CustomTextField extends StatelessWidget {
           textInputAction: textInputAction,
           onChanged: onChanged,
           onFieldSubmitted: onFieldSubmitted,
+          readOnly: readOnly,
+          onTap: onTap,
           maxLines: obscureText ? 1 : maxLines,
           minLines: obscureText ? 1 : minLines,
           decoration: InputDecoration(

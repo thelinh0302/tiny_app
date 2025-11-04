@@ -1,5 +1,19 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'package:finly_app/core/constants/app_spacing.dart';
+import 'package:finly_app/core/theme/app_colors.dart';
+import 'package:finly_app/core/widgets/custom_button.dart';
+import 'package:finly_app/core/widgets/custom_text_field.dart';
+import 'package:finly_app/core/widgets/date_text_field.dart';
+import 'package:finly_app/core/widgets/main_layout.dart';
+import 'package:finly_app/features/auth/presentation/widgets/social_login_button.dart';
+import 'package:finly_app/features/auth/presentation/widgets/terms_privacy_consent.dart';
+
+import 'package:finly_app/features/auth/presentation/bloc/signup_bloc.dart';
+import 'package:finly_app/features/auth/presentation/utils/signup_error_texts.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -9,134 +23,180 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  bool _obscure = true;
-  bool _loading = false;
-
   @override
   void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
-  }
-
-  Future<void> _submit() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    setState(() => _loading = true);
-    try {
-      // TODO: Hook real signup
-      await Future.delayed(const Duration(milliseconds: 500));
-      // After successful signup, navigate to login
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Account created. Please log in.')),
-      );
-      Modular.to.navigate('/auth/login');
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Sign up')),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Full name',
-                        prefixIcon: Icon(Icons.person_outline),
-                      ),
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Name is required';
-                        }
-                        return null;
-                      },
+    return BlocProvider(
+      create: (_) => Modular.get<SignupBloc>(),
+      child: BlocListener<SignupBloc, SignupState>(
+        listener: (context, state) {
+          if (state.status == SignupStatus.submissionSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('auth.signup.messages.accountCreated'.tr()),
+              ),
+            );
+            Modular.to.navigate('/auth/login');
+          } else if (state.status == SignupStatus.submissionFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.errorMessage ?? 'Error')),
+            );
+          }
+        },
+        child: MainLayout(
+          topChild: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.horizontalMedium,
+                  vertical: AppSpacing.verticalLarge,
+                ),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'auth.landing.signup'.tr(),
+                    style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty) {
-                          return 'Email is required';
-                        }
-                        if (!v.contains('@')) return 'Invalid email';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscure ? Icons.visibility : Icons.visibility_off,
-                          ),
-                          onPressed: () => setState(() => _obscure = !_obscure),
-                        ),
-                      ),
-                      obscureText: _obscure,
-                      validator: (v) {
-                        if (v == null || v.isEmpty)
-                          return 'Password is required';
-                        if (v.length < 4) return 'Password too short';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: _loading ? null : _submit,
-                        child:
-                            _loading
-                                ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                                : const Text('Create account'),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: () => Modular.to.navigate('/auth/login'),
-                      child: const Text('Already have an account? Log in'),
-                    ),
-                  ],
+                  ),
                 ),
               ),
+            ],
+          ),
+          enableContentScroll: true,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: BlocBuilder<SignupBloc, SignupState>(
+              builder: (context, state) {
+                final bloc = BlocProvider.of<SignupBloc>(context);
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppSpacing.verticalSpaceXLarge,
+                    // Full name
+                    CustomTextField(
+                      labelText: 'auth.signup.labels.fullName'.tr(),
+                      keyboardType: TextInputType.name,
+                      onChanged: (v) => bloc.add(SignupFullNameChanged(v)),
+                      errorText:
+                          state.fullName.displayError != null
+                              ? 'auth.signup.validation.fullNameRequired'.tr()
+                              : null,
+                    ),
+                    AppSpacing.verticalSpaceXLarge,
+                    // Email
+                    CustomTextField(
+                      labelText: 'auth.signup.labels.email'.tr(),
+                      keyboardType: TextInputType.emailAddress,
+                      onChanged: (v) => bloc.add(SignupEmailChanged(v)),
+                      errorText: emailErrorText(state.email),
+                    ),
+                    AppSpacing.verticalSpaceXLarge,
+                    // Mobile
+                    CustomTextField(
+                      labelText: 'auth.signup.labels.mobile'.tr(),
+                      keyboardType: TextInputType.phone,
+                      onChanged: (v) => bloc.add(SignupMobileChanged(v)),
+                      errorText: mobileErrorText(state.mobile),
+                    ),
+                    AppSpacing.verticalSpaceXLarge,
+                    // DOB
+                    DateTextField(
+                      labelText: 'auth.signup.labels.dob'.tr(),
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime.now(),
+                      onDateChanged: (d) => bloc.add(SignupDobChanged(d)),
+                      errorText: dobErrorText(state.dob),
+                    ),
+                    AppSpacing.verticalSpaceXLarge,
+                    // Password
+                    CustomTextField(
+                      labelText: 'auth.signup.labels.password'.tr(),
+                      obscureText: state.obscurePassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          state.obscurePassword
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed:
+                            () =>
+                                bloc.add(const SignupPasswordObscureToggled()),
+                      ),
+                      onChanged: (v) => bloc.add(SignupPasswordChanged(v)),
+                      errorText: passwordErrorText(state.password),
+                    ),
+                    AppSpacing.verticalSpaceXLarge,
+                    // Confirm Password
+                    CustomTextField(
+                      labelText: 'auth.signup.labels.confirmPassword'.tr(),
+                      obscureText: state.obscureConfirm,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          state.obscureConfirm
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                        ),
+                        onPressed:
+                            () => bloc.add(const SignupConfirmObscureToggled()),
+                      ),
+                      onChanged:
+                          (v) => bloc.add(SignupConfirmPasswordChanged(v)),
+                      textInputAction: TextInputAction.done,
+                      onFieldSubmitted:
+                          (_) => bloc.add(const SignupSubmitted()),
+                      errorText: confirmErrorText(state.confirmPassword),
+                    ),
+                    AppSpacing.verticalSpaceXLarge,
+                    const TermsPrivacyConsent(),
+                    AppSpacing.verticalSpaceXLarge,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: PrimaryButton(
+                            text: 'auth.landing.signup'.tr(),
+                            onPressed: () => bloc.add(const SignupSubmitted()),
+                            isLoading:
+                                state.status ==
+                                SignupStatus.submissionInProgress,
+                          ),
+                        ),
+                      ],
+                    ),
+                    AppSpacing.verticalSpaceXLarge,
+                    SocialLogin(
+                      onGooglePressed: () {
+                        // TODO: Implement Google signup/login
+                      },
+                      onFacebookPressed: () {
+                        // TODO: Implement Facebook signup/login
+                      },
+                    ),
+                    AppSpacing.verticalSpaceXLarge,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'auth.login.noAccountPrefix'.tr(),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.darkGrey),
+                        ),
+                        TextButton(
+                          onPressed: () => Modular.to.navigate('/auth/login'),
+                          child: Text('auth.landing.login'.tr()),
+                        ),
+                      ],
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ),

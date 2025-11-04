@@ -13,7 +13,7 @@ class UserModule extends Module {
   @override
   void binds(Injector i) {
     // BLoC
-    i.addLazySingleton<UserBloc>(
+    i.add<UserBloc>(
       () => UserBloc(getUser: i.get<GetUser>(), getUsers: i.get<GetUsers>()),
     );
 

@@ -7,6 +7,7 @@ class MainLayout extends StatelessWidget {
   final double topHeightRatio;
   final Color topColor;
   final BorderRadiusGeometry borderRadius;
+  final bool enableContentScroll;
 
   const MainLayout({
     super.key,
@@ -18,6 +19,7 @@ class MainLayout extends StatelessWidget {
       topLeft: Radius.circular(40),
       topRight: Radius.circular(40),
     ),
+    this.enableContentScroll = false,
   });
 
   @override
@@ -56,7 +58,28 @@ class MainLayout extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
-                child: SafeArea(top: false, child: child),
+                child: SafeArea(
+                  top: false,
+                  child:
+                      enableContentScroll
+                          ? LayoutBuilder(
+                            builder: (context, constraints) {
+                              return SingleChildScrollView(
+                                padding: EdgeInsets.only(
+                                  bottom:
+                                      MediaQuery.of(context).viewInsets.bottom,
+                                ),
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    minHeight: constraints.maxHeight,
+                                  ),
+                                  child: child,
+                                ),
+                              );
+                            },
+                          )
+                          : child,
+                ),
               ),
             ),
           ),

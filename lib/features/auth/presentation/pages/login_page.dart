@@ -63,6 +63,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ],
           ),
+          enableContentScroll: true,
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 420),
             child: BlocBuilder<LoginBloc, LoginState>(
