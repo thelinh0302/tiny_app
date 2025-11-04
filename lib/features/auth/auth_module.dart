@@ -1,10 +1,41 @@
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:finly_app/core/services/auth_service.dart';
+
+// Presentation
 import 'presentation/pages/auth_landing_page.dart';
 import 'presentation/pages/login_page.dart';
 import 'presentation/pages/signup_page.dart';
+import 'presentation/bloc/login_bloc.dart';
+
+// Domain
+import 'domain/repositories/auth_repository.dart';
+import 'domain/usecases/login.dart';
+
+// Data
+import 'data/datasources/auth_remote_data_source.dart';
+import 'data/repositories/auth_repository_impl.dart';
 
 /// AuthModule holds public auth-related routes: login, signup
 class AuthModule extends Module {
+  @override
+  void binds(Injector i) {
+    // Data source
+    i.addLazySingleton<AuthRemoteDataSource>(
+      () => AuthRemoteDataSourceImpl(authService: Modular.get<AuthService>()),
+    );
+
+    // Repository
+    i.addLazySingleton<AuthRepository>(
+      () => AuthRepositoryImpl(remote: i.get<AuthRemoteDataSource>()),
+    );
+
+    // Use case
+    i.addLazySingleton<Login>(() => Login(i.get<AuthRepository>()));
+
+    // Bloc
+    i.addLazySingleton<LoginBloc>(() => LoginBloc(login: i.get<Login>()));
+  }
+
   @override
   void routes(RouteManager r) {
     // /auth -> landing with login, signup, and social options

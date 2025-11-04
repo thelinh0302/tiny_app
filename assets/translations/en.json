@@ -46,6 +46,19 @@
       "tagline": "Smart money, simple life.",
       "login": "Login",
       "signup": "Sign Up"
+    },
+    "login": {
+      "title": "Welcome",
+      "emailOrUsername": "Username or Email",
+      "password": "Password",
+      "forgotPassword": "Forgot Password?",
+      "noAccountPrefix": "Don’t have an account? ",
+      "validation": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Invalid email",
+        "passwordRequired": "Password is required",
+        "passwordTooShort": "Password too short"
+      }
     }
   }
 }

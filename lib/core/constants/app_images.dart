@@ -10,6 +10,10 @@ class AppImages {
   static const String onboarding1 = '$_base/onboarding1.png';
   static const String onboarding2 = '$_base/onboarding2.png';
   static const String primaryLogo = '$_base/finlyLogoPrimary.png';
+  // Auth
+  static const String faceId = '$_base/faceId.png';
+  static const String google = '$_base/google.png';
+  static const String facebook = '$_base/facebook.png';
 
   // Example placeholders (add your PNGs/SVGs here)
   // static const String logoPng = '$_base/logo.png';

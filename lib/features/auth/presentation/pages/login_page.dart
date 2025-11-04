@@ -1,6 +1,16 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:finly_app/core/constants/app_spacing.dart';
+import 'package:finly_app/core/widgets/custom_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import '../../../../core/services/auth_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:finly_app/features/auth/presentation/bloc/login_bloc.dart';
+import 'package:finly_app/features/auth/presentation/models/login_inputs.dart';
+import 'package:finly_app/core/widgets/main_layout.dart';
+import 'package:finly_app/core/widgets/custom_text_field.dart';
+import 'package:finly_app/core/theme/app_colors.dart';
+import 'package:finly_app/features/auth/presentation/widgets/face_id_button.dart';
+import 'package:finly_app/features/auth/presentation/widgets/social_login_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -10,119 +20,161 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool _obscure = true;
-  bool _loading = false;
+  // Managed by LoginBloc via Formz
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
     super.dispose();
-  }
-
-  Future<void> _submit() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    setState(() => _loading = true);
-    try {
-      final auth = Modular.get<AuthService>();
-      final ok = await auth.login(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
-      if (ok) {
-        Modular.to.navigate('/user/');
-      } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Login failed')));
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Login')),
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 420),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
-                      ),
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (v) {
-                        if (v == null || v.trim().isEmpty)
-                          return 'Email is required';
-                        if (!v.contains('@')) return 'Invalid email';
-                        return null;
-                      },
+    return BlocProvider(
+      create: (_) => Modular.get<LoginBloc>(),
+      child: BlocListener<LoginBloc, LoginState>(
+        listener: (context, state) {
+          if (state.status == LoginStatus.submissionSuccess) {
+            Modular.to.navigate('/user/');
+          } else if (state.status == LoginStatus.submissionFailure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(state.errorMessage ?? 'Login failed')),
+            );
+          }
+        },
+        child: MainLayout(
+          topChild: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.horizontalMedium,
+                  vertical: AppSpacing.verticalLarge,
+                ),
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'auth.login.title'.tr(),
+                    style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.bold,
                     ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _passwordController,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscure ? Icons.visibility : Icons.visibility_off,
-                          ),
-                          onPressed: () => setState(() => _obscure = !_obscure),
-                        ),
-                      ),
-                      obscureText: _obscure,
-                      validator: (v) {
-                        if (v == null || v.isEmpty)
-                          return 'Password is required';
-                        if (v.length < 4) return 'Password too short';
-                        return null;
-                      },
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton(
-                        onPressed: _loading ? null : _submit,
-                        child:
-                            _loading
-                                ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                                : const Text('Login'),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: () => Modular.to.navigate('/auth/signup'),
-                      child: const Text('Create an account'),
-                    ),
-                  ],
+                  ),
                 ),
               ),
+            ],
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 420),
+            child: BlocBuilder<LoginBloc, LoginState>(
+              builder:
+                  (context, state) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AppSpacing.verticalSpaceXLarge,
+                      CustomTextField(
+                        labelText: 'auth.login.emailOrUsername'.tr(),
+                        keyboardType: TextInputType.emailAddress,
+                        onChanged:
+                            (v) => BlocProvider.of<LoginBloc>(
+                              context,
+                            ).add(LoginEmailChanged(v)),
+                        errorText:
+                            state.email.displayError != null
+                                ? (state.email.displayError ==
+                                        EmailValidationError.empty
+                                    ? 'auth.login.validation.emailRequired'.tr()
+                                    : 'auth.login.validation.emailInvalid'.tr())
+                                : null,
+                      ),
+                      AppSpacing.verticalSpaceXLarge,
+                      CustomTextField(
+                        labelText: 'auth.login.password'.tr(),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            state.obscure
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed:
+                              () => BlocProvider.of<LoginBloc>(
+                                context,
+                              ).add(const LoginObscureToggled()),
+                        ),
+                        obscureText: state.obscure,
+                        onChanged:
+                            (v) => BlocProvider.of<LoginBloc>(
+                              context,
+                            ).add(LoginPasswordChanged(v)),
+                        errorText:
+                            state.password.displayError != null
+                                ? (state.password.displayError ==
+                                        PasswordValidationError.empty
+                                    ? 'auth.login.validation.passwordRequired'
+                                        .tr()
+                                    : 'auth.login.validation.passwordTooShort'
+                                        .tr())
+                                : null,
+                      ),
+                      AppSpacing.verticalSpaceXLarge,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: PrimaryButton(
+                              text: 'auth.landing.login'.tr(),
+                              onPressed:
+                                  () => BlocProvider.of<LoginBloc>(
+                                    context,
+                                  ).add(const LoginSubmitted()),
+                              isLoading:
+                                  state.status ==
+                                  LoginStatus.submissionInProgress,
+                            ),
+                          ),
+                          AppSpacing.horizontalSpaceMedium,
+                          FaceIdButton(
+                            onPressed: () {
+                              // TODO: Implement Face ID login
+                            },
+                          ),
+                        ],
+                      ),
+                      AppSpacing.verticalSpaceXLarge,
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: LinkButton(
+                          text: 'auth.login.forgotPassword'.tr(),
+                          onPressed: () {},
+                        ),
+                      ),
+
+                      AppSpacing.verticalSpaceXLarge,
+                      SocialLogin(
+                        onGooglePressed: () {
+                          // TODO: Implement Google login
+                        },
+                        onFacebookPressed: () {
+                          // TODO: Implement Facebook login
+                        },
+                      ),
+                      AppSpacing.verticalSpaceXLarge,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'auth.login.noAccountPrefix'.tr(),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(color: AppColors.darkGrey),
+                          ),
+                          TextButton(
+                            onPressed:
+                                () => Modular.to.navigate('/auth/signup'),
+                            child: Text('auth.landing.signup'.tr()),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
             ),
           ),
         ),

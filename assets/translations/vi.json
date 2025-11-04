@@ -46,6 +46,19 @@
       "tagline": "Tiền thông minh, cuộc sống đơn giản.",
       "login": "Đăng nhập",
       "signup": "Đăng ký"
+    },
+    "login": {
+      "title": "Chào mừng",
+      "emailOrUsername": "Tên đăng nhập hoặc Email",
+      "password": "Mật khẩu",
+      "forgotPassword": "Quên mật khẩu?",
+      "noAccountPrefix": "Chưa có tài khoản? ",
+      "validation": {
+        "emailRequired": "Email là bắt buộc",
+        "emailInvalid": "Email không hợp lệ",
+        "passwordRequired": "Mật khẩu là bắt buộc",
+        "passwordTooShort": "Mật khẩu quá ngắn"
+      }
     }
   }
 }

@@ -138,3 +138,69 @@ class OutlineButton extends StatelessWidget {
     );
   }
 }
+
+/// Custom link button (text-style)
+class LinkButton extends StatelessWidget {
+  final String text;
+  final VoidCallback onPressed;
+  final bool isLoading;
+  final bool isDisabled;
+  final IconData? icon;
+
+  const LinkButton({
+    super.key,
+    required this.text,
+    required this.onPressed,
+    this.isLoading = false,
+    this.isDisabled = false,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final Color activeColor = AppColors.mainGreen;
+    final TextStyle? labelStyle = Theme.of(context).textTheme.titleMedium
+        ?.copyWith(color: activeColor, fontWeight: FontWeight.bold);
+
+    return TextButton(
+      onPressed: isDisabled || isLoading ? null : onPressed,
+      style: TextButton.styleFrom(
+        // Link-like appearance: minimal padding and compact tap target
+        padding: EdgeInsets.zero,
+        minimumSize: Size.zero,
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        foregroundColor: activeColor,
+      ).copyWith(
+        // Dim the color when disabled
+        foregroundColor: MaterialStateProperty.resolveWith((states) {
+          if (states.contains(MaterialState.disabled)) {
+            return Theme.of(context).disabledColor;
+          }
+          return activeColor;
+        }),
+      ),
+      child:
+          isLoading
+              ? SizedBox(
+                height: AppSizes.loadingSmall,
+                width: AppSizes.loadingSmall,
+                child: const CircularProgressIndicator(
+                  strokeWidth: AppSizes.borderWidthMedium,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    AppColors.mainGreen,
+                  ),
+                ),
+              )
+              : icon != null
+              ? Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(icon),
+                  AppSpacing.horizontalSpaceSmall,
+                  Text(text, style: labelStyle),
+                ],
+              )
+              : Text(text, style: labelStyle),
+    );
+  }
+}

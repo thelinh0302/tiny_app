@@ -57,6 +57,14 @@ class AuthLandingPage extends StatelessWidget {
                       onPressed: _goSignup,
                     ),
                   ),
+                  AppSpacing.verticalSpaceSmall,
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: LinkButton(
+                      text: 'Forgot Password?',
+                      onPressed: _goSignup,
+                    ),
+                  ),
                 ],
               ),
             ),
