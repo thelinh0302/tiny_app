@@ -58,6 +58,7 @@ dependencies:
   easy_localization: ^3.0.3
   # SVG support
   flutter_svg: ^2.0.10+1
+  supabase_flutter: ^2.6.0
 
 dev_dependencies:
   flutter_test:
