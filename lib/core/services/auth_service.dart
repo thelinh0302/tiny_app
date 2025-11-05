@@ -4,6 +4,9 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:finly_app/core/error/exceptions.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:finly_app/core/config/supabase_config.dart';
+import 'package:flutter/services.dart';
 
 /// Auth Service backed by Supabase Auth (email/password)
 /// - Maintains a ValueNotifier<bool> for route guards and UI
@@ -91,6 +94,59 @@ class AuthService {
       throw NetworkException(e.message);
     } catch (e) {
       throw ServerException('Unexpected logout error: $e');
+    }
+  }
+
+  Future<bool> signInWithGoogle() async {
+    try {
+      final supa = Supabase.instance.client;
+
+      final googleSignIn = GoogleSignIn(
+        serverClientId:
+            '148122859551-iibdn73f1a30cn6dhok8re6r4bt47pl3.apps.googleusercontent.com',
+        // iOS requires explicit clientId (the iOS client ID from Google console).
+        clientId:
+            '148122859551-8mji481iib0pqgv8e2r7p9rqj73bsbqh.apps.googleusercontent.com',
+        // scopes: const ['email', 'profile', 'openid'],
+      );
+
+      final account = await googleSignIn.signIn();
+      if (account == null) {
+        // User canceled the sign-in flow.
+        throw ServerException('Google sign-in cancelled');
+      }
+      final auth = await account.authentication;
+
+      final idToken = auth.idToken;
+      final accessToken = auth.accessToken;
+
+      if (idToken == null || idToken.isEmpty) {
+        throw ServerException('Missing Google ID token');
+      }
+
+      final res = await supa.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+        accessToken: accessToken,
+      );
+
+      final ok = res.session != null;
+      _isLoggedIn.value = ok;
+      return ok;
+    } on AuthException catch (e) {
+      print(e.message);
+      throw ServerException(e.message);
+    } on PlatformException catch (e) {
+      print(e.message);
+      throw ServerException(
+        'Google Sign-In failed: ${e.code} ${e.message ?? ''}',
+      );
+    } on SocketException catch (e) {
+      throw NetworkException(e.message);
+    } on TimeoutException {
+      throw ServerException('Google sign-in timed out');
+    } catch (e) {
+      throw ServerException('Unexpected Google sign-in error: $e');
     }
   }
 

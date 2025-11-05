@@ -49,5 +49,20 @@
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<!-- <dict>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>io.supabase.flutter</string>
+				</array>
+			</dict> -->
+			<dict>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.googleusercontent.apps.148122859551-8mji481iib0pqgv8e2r7p9rqj73bsbqh</string>
+				</array>
+			</dict>
+		</array>
 	</dict>
 </plist>

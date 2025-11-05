@@ -2,6 +2,7 @@ import 'package:finly_app/core/services/auth_service.dart';
 
 abstract class AuthRemoteDataSource {
   Future<bool> login(String email, String password);
+  Future<bool> loginWithGoogle();
 
   Future<bool> signup({
     required String fullName,
@@ -20,6 +21,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<bool> login(String email, String password) {
     return authService.login(email, password);
+  }
+
+  @override
+  Future<bool> loginWithGoogle() {
+    return authService.signInWithGoogle();
   }
 
   @override

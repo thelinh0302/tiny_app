@@ -12,6 +12,7 @@ import 'presentation/bloc/signup_bloc.dart';
 import 'domain/repositories/auth_repository.dart';
 import 'domain/usecases/login.dart';
 import 'domain/usecases/signup.dart';
+import 'domain/usecases/login_with_google.dart';
 
 // Data
 import 'data/datasources/auth_remote_data_source.dart';
@@ -34,9 +35,17 @@ class AuthModule extends Module {
     // Use case
     i.addLazySingleton<Login>(() => Login(i.get<AuthRepository>()));
     i.addLazySingleton<Signup>(() => Signup(i.get<AuthRepository>()));
+    i.addLazySingleton<LoginWithGoogle>(
+      () => LoginWithGoogle(i.get<AuthRepository>()),
+    );
 
     // Bloc
-    i.add<LoginBloc>(() => LoginBloc(login: i.get<Login>()));
+    i.add<LoginBloc>(
+      () => LoginBloc(
+        login: i.get<Login>(),
+        loginWithGoogle: i.get<LoginWithGoogle>(),
+      ),
+    );
     i.add<SignupBloc>(() => SignupBloc(signup: i.get<Signup>()));
   }
 
