@@ -13,6 +13,7 @@ import 'domain/repositories/auth_repository.dart';
 import 'domain/usecases/login.dart';
 import 'domain/usecases/signup.dart';
 import 'domain/usecases/login_with_google.dart';
+import 'domain/usecases/login_with_facebook.dart';
 
 // Data
 import 'data/datasources/auth_remote_data_source.dart';
@@ -38,12 +39,16 @@ class AuthModule extends Module {
     i.addLazySingleton<LoginWithGoogle>(
       () => LoginWithGoogle(i.get<AuthRepository>()),
     );
+    i.addLazySingleton<LoginWithFacebook>(
+      () => LoginWithFacebook(i.get<AuthRepository>()),
+    );
 
     // Bloc
     i.add<LoginBloc>(
       () => LoginBloc(
         login: i.get<Login>(),
         loginWithGoogle: i.get<LoginWithGoogle>(),
+        loginWithFacebook: i.get<LoginWithFacebook>(),
       ),
     );
     i.add<SignupBloc>(() => SignupBloc(signup: i.get<Signup>()));

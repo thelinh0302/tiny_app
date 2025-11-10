@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:finly_app/core/error/exceptions.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:finly_app/core/config/supabase_config.dart';
 import 'package:flutter/services.dart';
 
@@ -147,6 +148,54 @@ class AuthService {
       throw ServerException('Google sign-in timed out');
     } catch (e) {
       throw ServerException('Unexpected Google sign-in error: $e');
+    }
+  }
+
+  Future<bool> signInWithFacebook() async {
+    try {
+      final supa = Supabase.instance.client;
+
+      // 1) Trigger native Facebook login to obtain an access token
+      final LoginResult result = await FacebookAuth.instance.login(
+        permissions: const ['email', 'public_profile'],
+      );
+
+      if (result.status != LoginStatus.success) {
+        if (result.status == LoginStatus.cancelled) {
+          throw ServerException('Facebook sign-in cancelled');
+        }
+        final msg = result.message ?? 'Facebook sign-in failed';
+        throw ServerException(msg);
+      }
+
+      final AccessToken? fbToken = result.accessToken;
+      if (fbToken == null || fbToken.token.isEmpty) {
+        throw ServerException('Missing Facebook access token');
+      }
+
+      // 2) Exchange Facebook access token for a Supabase session
+      // Supabase supports native Facebook sign in using signInWithIdToken
+      // by supplying the accessToken (idToken not used for Facebook).
+      final res = await supa.auth.signInWithIdToken(
+        provider: OAuthProvider.facebook,
+        idToken: fbToken.token, // For Facebook, pass the access token here
+      );
+
+      final ok = res.session != null;
+      _isLoggedIn.value = ok;
+      return ok;
+    } on AuthException catch (e) {
+      throw ServerException(e.message);
+    } on PlatformException catch (e) {
+      throw ServerException(
+        'Facebook Sign-In failed: ${e.code} ${e.message ?? ''}',
+      );
+    } on SocketException catch (e) {
+      throw NetworkException(e.message);
+    } on TimeoutException {
+      throw ServerException('Facebook sign-in timed out');
+    } catch (e) {
+      throw ServerException('Unexpected Facebook sign-in error: $e');
     }
   }
 

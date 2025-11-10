@@ -157,7 +157,9 @@ class _LoginPageState extends State<LoginPage> {
                           ).add(const LoginWithGooglePressed());
                         },
                         onFacebookPressed: () {
-                          // TODO: Implement Facebook login
+                          BlocProvider.of<LoginBloc>(
+                            context,
+                          ).add(const LoginWithFacebookPressed());
                         },
                       ),
                       AppSpacing.verticalSpaceXLarge,

@@ -34,3 +34,7 @@ class LoginSubmitted extends LoginEvent {
 class LoginWithGooglePressed extends LoginEvent {
   const LoginWithGooglePressed();
 }
+
+class LoginWithFacebookPressed extends LoginEvent {
+  const LoginWithFacebookPressed();
+}

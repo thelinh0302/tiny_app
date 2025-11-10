@@ -60,6 +60,7 @@ dependencies:
   flutter_svg: ^2.0.10+1
   supabase_flutter: ^2.6.0
   google_sign_in: ^6.2.1
+  flutter_facebook_auth: ^6.0.4
 
 dev_dependencies:
   flutter_test:

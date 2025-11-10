@@ -4,6 +4,7 @@ import 'package:finly_app/core/error/failures.dart';
 abstract class AuthRepository {
   Future<Either<Failure, bool>> login(String email, String password);
   Future<Either<Failure, bool>> loginWithGoogle();
+  Future<Either<Failure, bool>> loginWithFacebook();
 
   Future<Either<Failure, bool>> signup({
     required String fullName,
