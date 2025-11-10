@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:finly_app/core/config/supabase_config.dart';
 import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart';
 
 /// Auth Service backed by Supabase Auth (email/password)
 /// - Maintains a ValueNotifier<bool> for route guards and UI
@@ -103,11 +104,9 @@ class AuthService {
       final supa = Supabase.instance.client;
 
       final googleSignIn = GoogleSignIn(
-        serverClientId:
-            '148122859551-iibdn73f1a30cn6dhok8re6r4bt47pl3.apps.googleusercontent.com',
+        serverClientId: SupabaseConfig.googleWebClientId,
         // iOS requires explicit clientId (the iOS client ID from Google console).
-        clientId:
-            '148122859551-8mji481iib0pqgv8e2r7p9rqj73bsbqh.apps.googleusercontent.com',
+        clientId: Platform.isIOS ? SupabaseConfig.googleIOSClientId : null,
         // scopes: const ['email', 'profile', 'openid'],
       );
 
@@ -196,6 +195,50 @@ class AuthService {
       throw ServerException('Facebook sign-in timed out');
     } catch (e) {
       throw ServerException('Unexpected Facebook sign-in error: $e');
+    }
+  }
+
+  Future<bool> signInWithBiometrics() async {
+    try {
+      final localAuth = LocalAuthentication();
+      final isSupported = await localAuth.isDeviceSupported();
+      final canCheck = await localAuth.canCheckBiometrics;
+
+      if (!isSupported || !canCheck) {
+        throw ServerException(
+          'Biometric authentication not available on this device',
+        );
+      }
+
+      final didAuthenticate = await localAuth.authenticate(
+        localizedReason: 'Authenticate to continue',
+        options: const AuthenticationOptions(
+          biometricOnly: true,
+          stickyAuth: true,
+          useErrorDialogs: true,
+        ),
+      );
+
+      if (!didAuthenticate) {
+        throw ServerException('Biometric authentication failed or cancelled');
+      }
+
+      // Unlock only if there is an existing Supabase session.
+      final supa = Supabase.instance.client;
+      final ok = supa.auth.currentSession != null;
+      if (!ok) {
+        throw ServerException(
+          'No active session found. Please login once to enable Face ID.',
+        );
+      }
+      _isLoggedIn.value = ok;
+      return ok;
+    } on PlatformException catch (e) {
+      throw ServerException('Biometric error: ${e.code} ${e.message ?? ''}');
+    } on SocketException catch (e) {
+      throw NetworkException(e.message);
+    } catch (e) {
+      throw ServerException('Unexpected biometric auth error: $e');
     }
   }
 

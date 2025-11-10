@@ -7,6 +7,8 @@ import 'package:finly_app/features/auth/domain/usecases/login_with_google.dart'
     as google_usecase;
 import 'package:finly_app/features/auth/domain/usecases/login_with_facebook.dart'
     as facebook_usecase;
+import 'package:finly_app/features/auth/domain/usecases/login_with_biometrics.dart'
+    as bio_usecase;
 import 'package:finly_app/core/usecases/usecase.dart';
 import 'package:finly_app/features/auth/presentation/models/login_inputs.dart';
 
@@ -17,11 +19,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final usecase.Login login;
   final google_usecase.LoginWithGoogle loginWithGoogle;
   final facebook_usecase.LoginWithFacebook loginWithFacebook;
+  final bio_usecase.LoginWithBiometrics loginWithBiometrics;
 
   LoginBloc({
     required this.login,
     required this.loginWithGoogle,
     required this.loginWithFacebook,
+    required this.loginWithBiometrics,
   }) : super(const LoginState()) {
     on<LoginEmailChanged>(_onEmailChanged);
     on<LoginPasswordChanged>(_onPasswordChanged);
@@ -29,6 +33,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<LoginSubmitted>(_onSubmitted);
     on<LoginWithGooglePressed>(_onLoginWithGoogle);
     on<LoginWithFacebookPressed>(_onLoginWithFacebook);
+    on<LoginWithBiometricsPressed>(_onLoginWithBiometrics);
   }
 
   void _onEmailChanged(LoginEmailChanged event, Emitter<LoginState> emit) {
@@ -113,6 +118,29 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     );
 
     final result = await loginWithFacebook(NoParams());
+    result.fold(
+      (failure) => emit(
+        state.copyWith(
+          status: LoginStatus.submissionFailure,
+          errorMessage: failure.message,
+        ),
+      ),
+      (ok) => emit(state.copyWith(status: LoginStatus.submissionSuccess)),
+    );
+  }
+
+  Future<void> _onLoginWithBiometrics(
+    LoginWithBiometricsPressed event,
+    Emitter<LoginState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        status: LoginStatus.submissionInProgress,
+        errorMessage: null,
+      ),
+    );
+
+    final result = await loginWithBiometrics(NoParams());
     result.fold(
       (failure) => emit(
         state.copyWith(

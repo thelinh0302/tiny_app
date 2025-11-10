@@ -14,6 +14,7 @@ import 'domain/usecases/login.dart';
 import 'domain/usecases/signup.dart';
 import 'domain/usecases/login_with_google.dart';
 import 'domain/usecases/login_with_facebook.dart';
+import 'domain/usecases/login_with_biometrics.dart';
 
 // Data
 import 'data/datasources/auth_remote_data_source.dart';
@@ -42,6 +43,9 @@ class AuthModule extends Module {
     i.addLazySingleton<LoginWithFacebook>(
       () => LoginWithFacebook(i.get<AuthRepository>()),
     );
+    i.addLazySingleton<LoginWithBiometrics>(
+      () => LoginWithBiometrics(i.get<AuthRepository>()),
+    );
 
     // Bloc
     i.add<LoginBloc>(
@@ -49,6 +53,7 @@ class AuthModule extends Module {
         login: i.get<Login>(),
         loginWithGoogle: i.get<LoginWithGoogle>(),
         loginWithFacebook: i.get<LoginWithFacebook>(),
+        loginWithBiometrics: i.get<LoginWithBiometrics>(),
       ),
     );
     i.add<SignupBloc>(() => SignupBloc(signup: i.get<Signup>()));

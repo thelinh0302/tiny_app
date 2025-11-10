@@ -135,7 +135,9 @@ class _LoginPageState extends State<LoginPage> {
                           AppSpacing.horizontalSpaceMedium,
                           FaceIdButton(
                             onPressed: () {
-                              // TODO: Implement Face ID login
+                              BlocProvider.of<LoginBloc>(
+                                context,
+                              ).add(const LoginWithBiometricsPressed());
                             },
                           ),
                         ],

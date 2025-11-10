@@ -13,6 +13,7 @@ import 'package:finly_app/features/auth/presentation/widgets/social_login_button
 import 'package:finly_app/features/auth/presentation/widgets/terms_privacy_consent.dart';
 
 import 'package:finly_app/features/auth/presentation/bloc/signup_bloc.dart';
+import 'package:finly_app/features/auth/presentation/bloc/login_bloc.dart';
 import 'package:finly_app/features/auth/presentation/utils/signup_error_texts.dart';
 
 class SignupPage extends StatefulWidget {
@@ -171,13 +172,37 @@ class _SignupPageState extends State<SignupPage> {
                       ],
                     ),
                     AppSpacing.verticalSpaceXLarge,
-                    SocialLogin(
-                      onGooglePressed: () {
-                        // TODO: Implement Google signup/login
-                      },
-                      onFacebookPressed: () {
-                        // TODO: Implement Facebook signup/login
-                      },
+                    BlocProvider<LoginBloc>(
+                      create: (_) => Modular.get<LoginBloc>(),
+                      child: BlocListener<LoginBloc, LoginState>(
+                        listener: (context, loginState) {
+                          if (loginState.status ==
+                              LoginStatus.submissionSuccess) {
+                            Modular.to.navigate('/user/');
+                          } else if (loginState.status ==
+                              LoginStatus.submissionFailure) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  loginState.errorMessage ?? 'Login failed',
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        child: SocialLogin(
+                          onGooglePressed: () {
+                            BlocProvider.of<LoginBloc>(
+                              context,
+                            ).add(const LoginWithGooglePressed());
+                          },
+                          onFacebookPressed: () {
+                            BlocProvider.of<LoginBloc>(
+                              context,
+                            ).add(const LoginWithFacebookPressed());
+                          },
+                        ),
+                      ),
                     ),
                     AppSpacing.verticalSpaceXLarge,
                     Row(

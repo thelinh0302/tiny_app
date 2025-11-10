@@ -49,6 +49,11 @@
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+
+		<!-- Face ID permission description for local_auth -->
+		<key>NSFaceIDUsageDescription</key>
+		<string>Use Face ID to quickly and securely authenticate.</string>
+
 		<key>CFBundleURLTypes</key>
 		<array>
 			<!-- <dict>

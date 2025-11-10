@@ -4,6 +4,7 @@ abstract class AuthRemoteDataSource {
   Future<bool> login(String email, String password);
   Future<bool> loginWithGoogle();
   Future<bool> loginWithFacebook();
+  Future<bool> loginWithBiometrics();
 
   Future<bool> signup({
     required String fullName,
@@ -32,6 +33,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<bool> loginWithFacebook() {
     return authService.signInWithFacebook();
+  }
+
+  @override
+  Future<bool> loginWithBiometrics() {
+    return authService.signInWithBiometrics();
   }
 
   @override
