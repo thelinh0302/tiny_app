@@ -15,7 +15,9 @@ class AppModule extends Module {
     i.addLazySingleton<DioClient>(() => DioClient());
 
     // Services
-    i.addLazySingleton<AuthService>(() => AuthService());
+    i.addLazySingleton<AuthService>(
+      () => AuthService(dioClient: i.get<DioClient>()),
+    );
   }
 
   @override

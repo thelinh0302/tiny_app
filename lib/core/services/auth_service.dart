@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart';
 import 'package:finly_app/core/error/exceptions.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -9,16 +10,21 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:finly_app/core/config/supabase_config.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:finly_app/core/network/dio_client.dart';
 
-/// Auth Service backed by Supabase Auth (email/password)
+/// Auth Service
+/// - Originally backed by Supabase Auth (email/password)
+/// - Now uses HTTP API for signup via DioClient
 /// - Maintains a ValueNotifier<bool> for route guards and UI
-/// - Maps Supabase errors to app Exceptions
+/// - Maps errors to app Exceptions
 /// - Leaves login state unchanged on signup (to support email confirmation flows)
 class AuthService {
   final ValueNotifier<bool> _isLoggedIn = ValueNotifier<bool>(false);
+  final DioClient dioClient;
   StreamSubscription<AuthState>? _authSub;
 
-  AuthService() {
+  AuthService({required this.dioClient}) {
+    // TODO: Remove Supabase usage once login & social auth are migrated to API
     final supa = Supabase.instance.client;
     // Initialize current login state
     _isLoggedIn.value = supa.auth.currentSession != null;
@@ -60,26 +66,40 @@ class AuthService {
     required String password,
   }) async {
     try {
-      final supa = Supabase.instance.client;
-      // Store app-specific info in user_metadata.
-      // Your DB trigger uses raw_user_meta_data->>'username' to create public.users.
-      await supa.auth.signUp(
-        email: email,
-        password: password,
+      // Call your HTTP API for signup using the shared DioClient.
+      // Adjust the endpoint path and payload keys to match your backend.
+      final response = await dioClient.post(
+        '/auth/signup',
         data: <String, dynamic>{
-          'username': fullName,
+          'fullName': fullName,
+          'email': email,
           'mobile': mobile,
           'dob': dob.toIso8601String(),
+          'password': password,
         },
       );
 
-      // Do not change login state here; many projects require email confirmation.
-      // The auth state listener will update _isLoggedIn if a session is created.
-      return true;
-    } on AuthException catch (e) {
-      throw ServerException(e.message);
-    } on SocketException catch (e) {
-      throw NetworkException(e.message);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        // Do not change login state here; many projects require email confirmation.
+        // The auth state listener (once fully migrated) or subsequent login will
+        // update _isLoggedIn if a session is created.
+        return true;
+      } else {
+        throw ServerException(
+          'Failed to signup: ${response.statusCode ?? 'unknown status'}',
+        );
+      }
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw NetworkException('Connection timeout');
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw NetworkException('No internet connection');
+      } else {
+        final message =
+            e.response?.statusMessage ?? e.message ?? 'Failed to signup';
+        throw ServerException(message);
+      }
     } catch (e) {
       throw ServerException('Unexpected signup error: $e');
     }
