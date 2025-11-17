@@ -5,6 +5,7 @@ import 'package:finly_app/core/services/auth_service.dart';
 import 'presentation/pages/auth_landing_page.dart';
 import 'presentation/pages/login_page.dart';
 import 'presentation/pages/signup_page.dart';
+import 'presentation/pages/otp_page.dart';
 import 'presentation/bloc/login_bloc.dart';
 import 'presentation/bloc/signup_bloc.dart';
 
@@ -15,6 +16,7 @@ import 'domain/usecases/signup.dart';
 import 'domain/usecases/login_with_google.dart';
 import 'domain/usecases/login_with_facebook.dart';
 import 'domain/usecases/login_with_biometrics.dart';
+import 'domain/usecases/signup_with_firebase_token.dart';
 
 // Data
 import 'data/datasources/auth_remote_data_source.dart';
@@ -56,7 +58,15 @@ class AuthModule extends Module {
         loginWithBiometrics: i.get<LoginWithBiometrics>(),
       ),
     );
-    i.add<SignupBloc>(() => SignupBloc(signup: i.get<Signup>()));
+    i.add<SignupBloc>(
+      () => SignupBloc(
+        signup: i.get<Signup>(),
+        phoneAuth: Modular.get(), // PhoneAuthService
+      ),
+    );
+    i.addLazySingleton<SignupWithFirebaseToken>(
+      () => SignupWithFirebaseToken(i.get<AuthRepository>()),
+    );
   }
 
   @override
@@ -67,5 +77,40 @@ class AuthModule extends Module {
     r.child('/login', child: (_) => const LoginPage());
     // /auth/signup
     r.child('/signup', child: (_) => const SignupPage());
+    // /auth/otp
+    r.child(
+      '/otp',
+      child: (_) {
+        final data = Modular.args.data;
+        // Expecting a map with all signup fields + verificationId
+        if (data is Map) {
+          final map = Map<String, dynamic>.from(data as Map);
+          final String verificationId = map['verificationId'] as String;
+          final String fullName = map['fullName'] as String;
+          final String email = map['email'] as String;
+          final String mobile = map['mobile'] as String;
+          final String dobIso = map['dob'] as String; // ISO8601 string
+          final String password = map['password'] as String;
+          final dob = DateTime.parse(dobIso);
+          return OtpPage(
+            verificationId: verificationId,
+            fullName: fullName,
+            email: email,
+            mobile: mobile,
+            dob: dob,
+            password: password,
+          );
+        }
+        // Fallback (should not happen)
+        return OtpPage(
+          verificationId: '',
+          fullName: '',
+          email: '',
+          mobile: '',
+          dob: DateTime(1970),
+          password: '',
+        );
+      },
+    );
   }
 }

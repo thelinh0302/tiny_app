@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>822867620295-hcnfqlgq7thhapn0uuq7659uqj8ho964.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.822867620295-hcnfqlgq7thhapn0uuq7659uqj8ho964</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAcU3QTiNRrtoVjWqlAzqvQWU4UDFaKoTc</string>
+	<key>GCM_SENDER_ID</key>
+	<string>822867620295</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.finlyApp</string>
+	<key>PROJECT_ID</key>
+	<string>finly-9144e</string>
+	<key>STORAGE_BUCKET</key>
+	<string>finly-9144e.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:822867620295:ios:56e1fb2c285e63eda529e2</string>
+</dict>
+</plist>

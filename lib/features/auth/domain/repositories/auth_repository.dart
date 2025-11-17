@@ -14,4 +14,13 @@ abstract class AuthRepository {
     required DateTime dob,
     required String password,
   });
+
+  Future<Either<Failure, bool>> signupWithFirebaseToken({
+    required String fullName,
+    required String email,
+    required String mobile,
+    required DateTime dob,
+    required String password,
+    required String firebaseIdToken,
+  });
 }

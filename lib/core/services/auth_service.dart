@@ -105,6 +105,50 @@ class AuthService {
     }
   }
 
+  Future<bool> signupWithFirebaseToken({
+    required String fullName,
+    required String email,
+    required String mobile,
+    required DateTime dob,
+    required String password,
+    required String firebaseIdToken,
+  }) async {
+    try {
+      final response = await dioClient.post(
+        '/auth/signup',
+        data: <String, dynamic>{
+          'fullName': fullName,
+          'email': email,
+          'mobile': mobile,
+          'dob': dob.toIso8601String(),
+          'password': password,
+          'firebaseIdToken': firebaseIdToken,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        throw ServerException(
+          'Failed to signup: ${response.statusCode ?? 'unknown status'}',
+        );
+      }
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw NetworkException('Connection timeout');
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw NetworkException('No internet connection');
+      } else {
+        final message =
+            e.response?.statusMessage ?? e.message ?? 'Failed to signup';
+        throw ServerException(message);
+      }
+    } catch (e) {
+      throw ServerException('Unexpected signup error: $e');
+    }
+  }
+
   Future<void> logout() async {
     try {
       final supa = Supabase.instance.client;

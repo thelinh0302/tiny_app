@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "822867620295",
+    "project_id": "finly-9144e",
+    "storage_bucket": "finly-9144e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:822867620295:android:bf557f03ad090a42a529e2",
+        "android_client_info": {
+          "package_name": "com.example.finly_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "822867620295-donio6ou5s0sq9ukoh4f7pah4o0esb36.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqgDAYBPnIjfglte-Eba0o-YRrtfO8eow"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "822867620295-donio6ou5s0sq9ukoh4f7pah4o0esb36.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "822867620295-hcnfqlgq7thhapn0uuq7659uqj8ho964.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.finlyApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

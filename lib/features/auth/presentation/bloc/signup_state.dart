@@ -5,6 +5,8 @@ enum SignupStatus {
   submissionInProgress,
   submissionSuccess,
   submissionFailure,
+  otpSending,
+  otpSent,
 }
 
 class SignupState extends Equatable {
@@ -19,6 +21,7 @@ class SignupState extends Equatable {
   final bool obscurePassword;
   final bool obscureConfirm;
   final String? errorMessage;
+  final String? verificationId;
 
   const SignupState({
     this.fullName = const FullNameInput.pure(),
@@ -31,6 +34,7 @@ class SignupState extends Equatable {
     this.obscurePassword = true,
     this.obscureConfirm = true,
     this.errorMessage,
+    this.verificationId,
   });
 
   SignupState copyWith({
@@ -44,6 +48,7 @@ class SignupState extends Equatable {
     bool? obscurePassword,
     bool? obscureConfirm,
     String? errorMessage,
+    String? verificationId,
   }) {
     return SignupState(
       fullName: fullName ?? this.fullName,
@@ -56,6 +61,7 @@ class SignupState extends Equatable {
       obscurePassword: obscurePassword ?? this.obscurePassword,
       obscureConfirm: obscureConfirm ?? this.obscureConfirm,
       errorMessage: errorMessage,
+      verificationId: verificationId ?? this.verificationId,
     );
   }
 
@@ -71,5 +77,6 @@ class SignupState extends Equatable {
     obscurePassword,
     obscureConfirm,
     errorMessage,
+    verificationId,
   ];
 }

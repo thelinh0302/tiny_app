@@ -94,6 +94,18 @@
         "openTerms": "Open Terms of Use",
         "openPrivacy": "Open Privacy Policy"
       }
+    },
+    "otp": {
+      "title": "Verify your phone",
+      "subtitle": "Enter the 6-digit code sent to {destination}",
+      "instructions": "Please enter the 6-digit code we sent to complete your signup.",
+      "verify": "Verify",
+      "resend": "Resend code",
+      "messages": {
+        "invalidCode": "Please enter a valid 6-digit code",
+        "codeResent": "A new code has been sent",
+        "verified": "Phone verified"
+      }
     }
   }
 }

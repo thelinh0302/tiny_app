@@ -13,6 +13,15 @@ abstract class AuthRemoteDataSource {
     required DateTime dob,
     required String password,
   });
+
+  Future<bool> signupWithFirebaseToken({
+    required String fullName,
+    required String email,
+    required String mobile,
+    required DateTime dob,
+    required String password,
+    required String firebaseIdToken,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -54,6 +63,25 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       mobile: mobile,
       dob: dob,
       password: password,
+    );
+  }
+
+  @override
+  Future<bool> signupWithFirebaseToken({
+    required String fullName,
+    required String email,
+    required String mobile,
+    required DateTime dob,
+    required String password,
+    required String firebaseIdToken,
+  }) {
+    return authService.signupWithFirebaseToken(
+      fullName: fullName,
+      email: email,
+      mobile: mobile,
+      dob: dob,
+      password: password,
+      firebaseIdToken: firebaseIdToken,
     );
   }
 }

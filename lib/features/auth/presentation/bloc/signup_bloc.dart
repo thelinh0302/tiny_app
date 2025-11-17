@@ -5,14 +5,17 @@ import 'package:formz/formz.dart';
 import 'package:finly_app/features/auth/domain/usecases/signup.dart' as usecase;
 import 'package:finly_app/features/auth/presentation/models/login_inputs.dart';
 import 'package:finly_app/features/auth/presentation/models/signup_inputs.dart';
+import 'package:finly_app/core/services/phone_auth_service.dart';
 
 part 'signup_event.dart';
 part 'signup_state.dart';
 
 class SignupBloc extends Bloc<SignupEvent, SignupState> {
   final usecase.Signup signup;
+  final PhoneAuthService phoneAuth;
 
-  SignupBloc({required this.signup}) : super(const SignupState()) {
+  SignupBloc({required this.signup, required this.phoneAuth})
+    : super(const SignupState()) {
     on<SignupFullNameChanged>(_onFullNameChanged);
     on<SignupEmailChanged>(_onEmailChanged);
     on<SignupMobileChanged>(_onMobileChanged);
@@ -120,31 +123,23 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
 
     if (!isValid) return;
 
-    emit(
-      state.copyWith(
-        status: SignupStatus.submissionInProgress,
-        errorMessage: null,
-      ),
-    );
+    emit(state.copyWith(status: SignupStatus.otpSending, errorMessage: null));
 
-    final result = await signup(
-      usecase.SignupParams(
-        fullName: fullName.value.trim(),
-        email: email.value.trim(),
-        mobile: mobile.value.trim(),
-        dob: dob.value!,
-        password: password.value,
-      ),
-    );
-
-    result.fold(
-      (failure) => emit(
+    try {
+      final verificationId = await phoneAuth.sendCode(mobile.value.trim());
+      emit(
+        state.copyWith(
+          status: SignupStatus.otpSent,
+          verificationId: verificationId,
+        ),
+      );
+    } catch (e) {
+      emit(
         state.copyWith(
           status: SignupStatus.submissionFailure,
-          errorMessage: failure.message,
+          errorMessage: e.toString(),
         ),
-      ),
-      (ok) => emit(state.copyWith(status: SignupStatus.submissionSuccess)),
-    );
+      );
+    }
   }
 }

@@ -35,13 +35,19 @@ class _SignupPageState extends State<SignupPage> {
       create: (_) => Modular.get<SignupBloc>(),
       child: BlocListener<SignupBloc, SignupState>(
         listener: (context, state) {
-          if (state.status == SignupStatus.submissionSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('auth.signup.messages.accountCreated'.tr()),
-              ),
+          if (state.status == SignupStatus.otpSent) {
+            // Navigate to OTP input after code has been sent by Firebase
+            Modular.to.navigate(
+              '/auth/otp',
+              arguments: {
+                'verificationId': state.verificationId,
+                'fullName': state.fullName.value,
+                'email': state.email.value,
+                'mobile': state.mobile.value,
+                'dob': state.dob.value!.toIso8601String(),
+                'password': state.password.value,
+              },
             );
-            Modular.to.navigate('/auth/login');
           } else if (state.status == SignupStatus.submissionFailure) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.errorMessage ?? 'Error')),
@@ -164,9 +170,7 @@ class _SignupPageState extends State<SignupPage> {
                           child: PrimaryButton(
                             text: 'auth.landing.signup'.tr(),
                             onPressed: () => bloc.add(const SignupSubmitted()),
-                            isLoading:
-                                state.status ==
-                                SignupStatus.submissionInProgress,
+                            isLoading: state.status == SignupStatus.otpSending,
                           ),
                         ),
                       ],

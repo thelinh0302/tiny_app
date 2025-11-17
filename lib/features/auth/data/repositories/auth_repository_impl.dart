@@ -90,4 +90,32 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure('Unexpected error: ${e.toString()}'));
     }
   }
+
+  @override
+  Future<Either<Failure, bool>> signupWithFirebaseToken({
+    required String fullName,
+    required String email,
+    required String mobile,
+    required DateTime dob,
+    required String password,
+    required String firebaseIdToken,
+  }) async {
+    try {
+      final ok = await remote.signupWithFirebaseToken(
+        fullName: fullName,
+        email: email,
+        mobile: mobile,
+        dob: dob,
+        password: password,
+        firebaseIdToken: firebaseIdToken,
+      );
+      return Right(ok);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure('Unexpected error: ${e.toString()}'));
+    }
+  }
 }
