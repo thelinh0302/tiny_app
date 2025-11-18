@@ -6,9 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:finly_app/core/constants/app_spacing.dart';
 import 'package:finly_app/core/theme/app_colors.dart';
 import 'package:finly_app/core/widgets/custom_button.dart';
-import 'package:finly_app/core/widgets/custom_text_field.dart';
 import 'package:finly_app/core/widgets/main_layout.dart';
 import 'package:finly_app/core/widgets/app_alert.dart';
+import 'package:finly_app/core/widgets/otp_code_input.dart';
 import 'package:finly_app/features/auth/presentation/bloc/reset_password_verify_bloc.dart';
 
 /// Page 2 of reset password flow (after phone input):
@@ -91,10 +91,22 @@ class _ResetPasswordVerifyPageState extends State<ResetPasswordVerifyPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     AppSpacing.verticalSpaceXLarge,
-                    CustomTextField(
-                      labelText: 'auth.otp.codeLabel'.tr(),
-                      keyboardType: TextInputType.number,
-                      onChanged: (v) => bloc.add(ResetPasswordCodeChanged(v)),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'auth.otp.codeLabel'.tr(),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: AppColors.darkGrey,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    AppSpacing.verticalSpaceMedium,
+                    OtpCodeInput(
+                      numberOfFields: 6,
+                      onCodeChanged:
+                          (v) => bloc.add(ResetPasswordCodeChanged(v)),
+                      onSubmit: (v) => bloc.add(ResetPasswordCodeChanged(v)),
                     ),
                     AppSpacing.verticalSpaceXLarge,
                     Row(

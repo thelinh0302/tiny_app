@@ -20,8 +20,11 @@ class OtpBloc extends Bloc<OtpEvent, OtpState> {
   }
 
   Future<void> _onSubmitted(OtpSubmitted event, Emitter<OtpState> emit) async {
+    // Normalize OTP to digits only; some widgets may add spaces or separators.
+    final normalizedCode = event.code.replaceAll(RegExp(r'[^0-9]'), '');
+
     // Simple input validation at the application/presentation layer.
-    if (event.code.length != 6) {
+    if (normalizedCode.length != 6) {
       emit(const OtpState.failure('auth.otp.messages.invalidCode'));
       return;
     }
@@ -31,7 +34,7 @@ class OtpBloc extends Bloc<OtpEvent, OtpState> {
     try {
       final idToken = await phoneAuth.verifyAndGetIdToken(
         verificationId: event.verificationId,
-        smsCode: event.code,
+        smsCode: normalizedCode,
       );
 
       final result = await signupWithFirebaseToken(

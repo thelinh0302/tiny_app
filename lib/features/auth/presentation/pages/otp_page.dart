@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:finly_app/core/widgets/app_alert.dart';
@@ -9,6 +8,7 @@ import 'package:finly_app/core/constants/app_spacing.dart';
 import 'package:finly_app/core/theme/app_colors.dart';
 import 'package:finly_app/core/widgets/custom_button.dart';
 import 'package:finly_app/core/widgets/main_layout.dart';
+import 'package:finly_app/core/widgets/otp_code_input.dart';
 import 'package:finly_app/features/auth/presentation/bloc/otp_bloc.dart';
 
 class OtpPage extends StatefulWidget {
@@ -149,52 +149,14 @@ class _OtpPageState extends State<OtpPage> {
                           textAlign: TextAlign.center,
                         ),
                         AppSpacing.verticalSpaceXLarge,
-                        TextField(
-                          controller: _codeController,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.displaySmall?.copyWith(
-                            letterSpacing: 8,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          inputFormatters: [
-                            FilteringTextInputFormatter.digitsOnly,
-                          ],
-                          maxLength: 6,
-                          decoration: InputDecoration(
-                            counterText: '',
-                            hintText: '• • • • • •',
-                            hintStyle: Theme.of(
-                              context,
-                            ).textTheme.displaySmall?.copyWith(
-                              color: AppColors.darkGrey.withOpacity(0.3),
-                              letterSpacing: 8,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            filled: true,
-                            fillColor: AppColors.white,
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: 18,
-                              horizontal: 16,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: BorderSide(
-                                color: AppColors.darkGrey.withOpacity(0.2),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(16),
-                              borderSide: const BorderSide(
-                                color: AppColors.mainGreen,
-                              ),
-                            ),
-                          ),
+                        OtpCodeInput(
+                          numberOfFields: 6,
+                          onCodeChanged: (code) {
+                            _codeController.text = code;
+                          },
+                          onSubmit: (value) {
+                            _codeController.text = value;
+                          },
                         ),
                         AppSpacing.verticalSpaceXLarge,
                         Row(

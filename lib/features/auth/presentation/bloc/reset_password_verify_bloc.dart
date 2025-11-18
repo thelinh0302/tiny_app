@@ -23,14 +23,24 @@ class ResetPasswordVerifyBloc
     ResetPasswordCodeChanged event,
     Emitter<ResetPasswordVerifyState> emit,
   ) {
-    emit(state.copyWith(code: event.code));
+    emit(
+      state.copyWith(
+        code: event.code,
+        status: ResetPasswordVerifyStatus.initial,
+        errorMessage: null,
+      ),
+    );
   }
 
   Future<void> _onSubmitted(
     ResetPasswordVerifySubmitted event,
     Emitter<ResetPasswordVerifyState> emit,
   ) async {
-    if (state.code.length != 6) {
+    print(state.code);
+    // Normalize OTP to digits only; widget may add spaces or separators.
+    final normalizedCode = state.code.replaceAll(RegExp(r'[^0-9]'), '');
+
+    if (normalizedCode.length != 6) {
       emit(
         state.copyWith(
           status: ResetPasswordVerifyStatus.failure,
@@ -50,7 +60,7 @@ class ResetPasswordVerifyBloc
     try {
       final idToken = await phoneAuth.verifyAndGetIdToken(
         verificationId: event.verificationId,
-        smsCode: state.code,
+        smsCode: normalizedCode,
       );
 
       emit(

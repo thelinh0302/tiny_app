@@ -68,6 +68,7 @@ dependencies:
   firebase_core: ^4.2.1
   firebase_auth: ^6.1.2
   quickalert: ^1.1.0
+  flutter_otp_text_field: ^1.5.1+1
 
 dev_dependencies:
   flutter_test:
