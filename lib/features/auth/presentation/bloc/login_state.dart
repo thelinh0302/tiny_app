@@ -10,14 +10,15 @@ enum LoginStatus {
 }
 
 class LoginState extends Equatable {
-  final EmailInput email;
+  /// Phone used for login (validated with [PhoneInput])
+  final PhoneInput phone;
   final PasswordInput password;
   final LoginStatus status;
   final bool obscure;
   final String? errorMessage;
 
   const LoginState({
-    this.email = const EmailInput.pure(),
+    this.phone = const PhoneInput.pure(),
     this.password = const PasswordInput.pure(),
     this.status = LoginStatus.pure,
     this.obscure = true,
@@ -25,14 +26,14 @@ class LoginState extends Equatable {
   });
 
   LoginState copyWith({
-    EmailInput? email,
+    PhoneInput? phone,
     PasswordInput? password,
     LoginStatus? status,
     bool? obscure,
     String? errorMessage,
   }) {
     return LoginState(
-      email: email ?? this.email,
+      phone: phone ?? this.phone,
       password: password ?? this.password,
       status: status ?? this.status,
       obscure: obscure ?? this.obscure,
@@ -41,5 +42,5 @@ class LoginState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [email, password, status, obscure, errorMessage];
+  List<Object?> get props => [phone, password, status, obscure, errorMessage];
 }

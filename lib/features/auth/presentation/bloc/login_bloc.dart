@@ -27,7 +27,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     required this.loginWithFacebook,
     required this.loginWithBiometrics,
   }) : super(const LoginState()) {
-    on<LoginEmailChanged>(_onEmailChanged);
+    on<LoginPhoneChanged>(_onPhoneChanged);
     on<LoginPasswordChanged>(_onPasswordChanged);
     on<LoginObscureToggled>(_onObscureToggled);
     on<LoginSubmitted>(_onSubmitted);
@@ -36,9 +36,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<LoginWithBiometricsPressed>(_onLoginWithBiometrics);
   }
 
-  void _onEmailChanged(LoginEmailChanged event, Emitter<LoginState> emit) {
-    final email = EmailInput.dirty(event.email);
-    emit(state.copyWith(email: email));
+  void _onPhoneChanged(LoginPhoneChanged event, Emitter<LoginState> emit) {
+    final phone = PhoneInput.dirty(event.phone);
+    emit(state.copyWith(phone: phone));
   }
 
   void _onPasswordChanged(
@@ -57,10 +57,10 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     LoginSubmitted event,
     Emitter<LoginState> emit,
   ) async {
-    final email = EmailInput.dirty(state.email.value);
+    final phone = PhoneInput.dirty(state.phone.value);
     final password = PasswordInput.dirty(state.password.value);
-    final isValid = Formz.validate([email, password]);
-    emit(state.copyWith(email: email, password: password));
+    final isValid = Formz.validate([phone, password]);
+    emit(state.copyWith(phone: phone, password: password));
     if (!isValid) return;
 
     emit(
@@ -70,7 +70,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       ),
     );
     final result = await login(
-      usecase.LoginParams(email: email.value.trim(), password: password.value),
+      usecase.LoginParams(phone: phone.value.trim(), password: password.value),
     );
     result.fold(
       (failure) => emit(

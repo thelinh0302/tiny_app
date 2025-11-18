@@ -78,11 +78,11 @@ class _LoginPageState extends State<LoginPage> {
                         onChanged:
                             (v) => BlocProvider.of<LoginBloc>(
                               context,
-                            ).add(LoginEmailChanged(v)),
+                            ).add(LoginPhoneChanged(v)),
                         errorText:
-                            state.email.displayError != null
-                                ? (state.email.displayError ==
-                                        EmailValidationError.empty
+                            state.phone.displayError != null
+                                ? (state.phone.displayError ==
+                                        PhoneValidationError.empty
                                     ? 'auth.login.validation.phoneRequired'.tr()
                                     : 'auth.login.validation.phoneInvalid'.tr())
                                 : null,

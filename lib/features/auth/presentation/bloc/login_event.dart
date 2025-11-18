@@ -7,12 +7,12 @@ abstract class LoginEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoginEmailChanged extends LoginEvent {
-  final String email;
-  const LoginEmailChanged(this.email);
+class LoginPhoneChanged extends LoginEvent {
+  final String phone;
+  const LoginPhoneChanged(this.phone);
 
   @override
-  List<Object?> get props => [email];
+  List<Object?> get props => [phone];
 }
 
 class LoginPasswordChanged extends LoginEvent {

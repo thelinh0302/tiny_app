@@ -42,11 +42,11 @@ class AuthService {
   bool get isLoggedIn => _isLoggedIn.value;
   ValueListenable<bool> get isLoggedInListenable => _isLoggedIn;
 
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(String phone, String password) async {
     try {
       // Allow using a Vietnamese phone number (e.g. 0399...) as the login
       // identifier by normalizing it to E.164 (+84...) when applicable.
-      final normalizedPhone = PhoneUtils.normalizeVietnamPhone(email);
+      final normalizedPhone = PhoneUtils.normalizeVietnamPhone(phone);
 
       // Call HTTP API login endpoint via DioClient
       final response = await dioClient.post(
