@@ -7,6 +7,9 @@ import 'package:quickalert/quickalert.dart';
 /// Default behavior mimics transient SnackBars: no confirm button
 /// and auto close after a short duration.
 class AppAlert {
+  // Prevent multiple alerts from stacking on top of each other.
+  static bool _isShowing = false;
+
   static Future<void> success(
     BuildContext context,
     String message, {
@@ -83,14 +86,22 @@ class AppAlert {
     Duration? duration,
     bool barrierDismissible = true,
   }) async {
-    return QuickAlert.show(
-      context: context,
-      type: type,
-      title: title,
-      text: message,
-      autoCloseDuration: duration,
-      showConfirmBtn: false,
-      barrierDismissible: barrierDismissible,
-    );
+    // If an alert is already visible, avoid showing another one on top.
+    if (_isShowing) return;
+
+    _isShowing = true;
+    try {
+      await QuickAlert.show(
+        context: context,
+        type: type,
+        title: title,
+        text: message,
+        autoCloseDuration: duration,
+        showConfirmBtn: false,
+        barrierDismissible: barrierDismissible,
+      );
+    } finally {
+      _isShowing = false;
+    }
   }
 }
