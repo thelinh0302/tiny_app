@@ -24,5 +24,11 @@ abstract class AuthRepository {
     required String firebaseIdToken,
   });
 
+  Future<Either<Failure, bool>> resetPasswordWithPhone({
+    required String phone,
+    required String newPassword,
+    required String firebaseIdToken,
+  });
+
   Future<Either<Failure, bool>> checkUserExists(String email, String mobile);
 }

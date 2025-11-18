@@ -102,12 +102,32 @@
       "title": "Xác minh số điện thoại",
       "subtitle": "Nhập mã 6 chữ số được gửi đến {destination}",
       "instructions": "Vui lòng nhập mã 6 chữ số chúng tôi đã gửi để hoàn tất đăng ký.",
+      "codeLabel": "Mã OTP",
       "verify": "Xác minh",
       "resend": "Gửi lại mã",
       "messages": {
         "invalidCode": "Vui lòng nhập mã 6 chữ số hợp lệ",
         "codeResent": "Mã mới đã được gửi",
         "verified": "Đã xác minh số điện thoại"
+      }
+    },
+    "resetPassword": {
+      "request": {
+        "title": "Đặt lại mật khẩu",
+        "submit": "Gửi mã"
+      },
+      "verify": {
+        "title": "Tạo mật khẩu mới",
+        "newPasswordLabel": "Mật khẩu mới",
+        "confirmPasswordLabel": "Xác nhận mật khẩu mới",
+        "submit": "Đổi mật khẩu"
+      },
+      "messages": {
+        "requestFailed": "Yêu cầu đặt lại mật khẩu thất bại",
+        "verifyFailed": "Xác minh mã hoặc đặt lại mật khẩu thất bại",
+        "userNotFound": "Không tìm thấy tài khoản với số điện thoại này",
+        "success": "Đặt lại mật khẩu thành công. Vui lòng đăng nhập.",
+        "invalidInputs": "Vui lòng nhập mã hợp lệ và mật khẩu khớp nhau"
       }
     }
   }

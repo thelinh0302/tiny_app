@@ -146,7 +146,11 @@ class _LoginPageState extends State<LoginPage> {
                         width: MediaQuery.of(context).size.width * 0.5,
                         child: LinkButton(
                           text: 'auth.login.forgotPassword'.tr(),
-                          onPressed: () {},
+                          onPressed: () {
+                            Modular.to.pushNamed(
+                              '/auth/reset-password/request',
+                            );
+                          },
                         ),
                       ),
 

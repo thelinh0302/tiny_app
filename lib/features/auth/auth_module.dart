@@ -6,9 +6,15 @@ import 'presentation/pages/auth_landing_page.dart';
 import 'presentation/pages/login_page.dart';
 import 'presentation/pages/signup_page.dart';
 import 'presentation/pages/otp_page.dart';
+import 'presentation/pages/reset_password_request_page.dart';
+import 'presentation/pages/reset_password_verify_page.dart';
+import 'presentation/pages/reset_password_new_password_page.dart';
 import 'presentation/bloc/login_bloc.dart';
 import 'presentation/bloc/signup_bloc.dart';
 import 'presentation/bloc/otp_bloc.dart';
+import 'presentation/bloc/reset_password_request_bloc.dart';
+import 'presentation/bloc/reset_password_verify_bloc.dart';
+import 'presentation/bloc/reset_password_new_password_bloc.dart';
 
 // Domain
 import 'domain/repositories/auth_repository.dart';
@@ -19,12 +25,13 @@ import 'domain/usecases/login_with_facebook.dart';
 import 'domain/usecases/login_with_biometrics.dart';
 import 'domain/usecases/signup_with_firebase_token.dart';
 import 'domain/usecases/check_user_exists.dart';
+import 'domain/usecases/reset_password_with_phone.dart';
 
 // Data
 import 'data/datasources/auth_remote_data_source.dart';
 import 'data/repositories/auth_repository_impl.dart';
 
-/// AuthModule holds public auth-related routes: login, signup
+/// AuthModule holds public auth-related routes: login, signup, reset password
 class AuthModule extends Module {
   @override
   void binds(Injector i) {
@@ -38,7 +45,7 @@ class AuthModule extends Module {
       () => AuthRepositoryImpl(remote: i.get<AuthRemoteDataSource>()),
     );
 
-    // Use case
+    // Use cases
     i.addLazySingleton<Login>(() => Login(i.get<AuthRepository>()));
     i.addLazySingleton<Signup>(() => Signup(i.get<AuthRepository>()));
     i.addLazySingleton<LoginWithGoogle>(
@@ -53,8 +60,11 @@ class AuthModule extends Module {
     i.addLazySingleton<CheckUserExists>(
       () => CheckUserExists(i.get<AuthRepository>()),
     );
+    i.addLazySingleton<ResetPasswordWithPhone>(
+      () => ResetPasswordWithPhone(i.get<AuthRepository>()),
+    );
 
-    // Bloc
+    // Blocs
     i.add<LoginBloc>(
       () => LoginBloc(
         login: i.get<Login>(),
@@ -80,6 +90,21 @@ class AuthModule extends Module {
         signupWithFirebaseToken: i.get<SignupWithFirebaseToken>(),
       ),
     );
+
+    i.add<ResetPasswordRequestBloc>(
+      () => ResetPasswordRequestBloc(
+        phoneAuth: Modular.get(),
+        checkUserExists: i.get<CheckUserExists>(),
+      ),
+    );
+    i.add<ResetPasswordVerifyBloc>(
+      () => ResetPasswordVerifyBloc(phoneAuth: Modular.get()),
+    );
+    i.add<ResetPasswordNewPasswordBloc>(
+      () => ResetPasswordNewPasswordBloc(
+        resetPasswordWithPhone: i.get<ResetPasswordWithPhone>(),
+      ),
+    );
   }
 
   @override
@@ -90,7 +115,7 @@ class AuthModule extends Module {
     r.child('/login', child: (_) => const LoginPage());
     // /auth/signup
     r.child('/signup', child: (_) => const SignupPage());
-    // /auth/otp
+    // /auth/otp (signup verification)
     r.child(
       '/otp',
       child: (_) {
@@ -122,6 +147,51 @@ class AuthModule extends Module {
           mobile: '',
           dob: DateTime(1970),
           password: '',
+        );
+      },
+    );
+
+    // /auth/reset-password/request
+    r.child(
+      '/reset-password/request',
+      child: (_) => const ResetPasswordRequestPage(),
+    );
+
+    // /auth/reset-password/verify (OTP input)
+    r.child(
+      '/reset-password/verify',
+      child: (_) {
+        final data = Modular.args.data;
+        if (data is Map) {
+          final map = Map<String, dynamic>.from(data as Map);
+          final String phone = map['phone'] as String;
+          final String verificationId = map['verificationId'] as String;
+          return ResetPasswordVerifyPage(
+            phone: phone,
+            verificationId: verificationId,
+          );
+        }
+        return const ResetPasswordVerifyPage(phone: '', verificationId: '');
+      },
+    );
+
+    // /auth/reset-password/new-password
+    r.child(
+      '/reset-password/new-password',
+      child: (_) {
+        final data = Modular.args.data;
+        if (data is Map) {
+          final map = Map<String, dynamic>.from(data as Map);
+          final String phone = map['phone'] as String;
+          final String firebaseIdToken = map['firebaseIdToken'] as String;
+          return ResetPasswordNewPasswordPage(
+            phone: phone,
+            firebaseIdToken: firebaseIdToken,
+          );
+        }
+        return const ResetPasswordNewPasswordPage(
+          phone: '',
+          firebaseIdToken: '',
         );
       },
     );

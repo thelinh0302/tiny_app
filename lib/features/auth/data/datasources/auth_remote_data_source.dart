@@ -23,6 +23,12 @@ abstract class AuthRemoteDataSource {
     required String firebaseIdToken,
   });
 
+  Future<bool> resetPasswordWithPhone({
+    required String phone,
+    required String newPassword,
+    required String firebaseIdToken,
+  });
+
   Future<bool> checkUserExists({required String email, required String mobile});
 }
 
@@ -83,6 +89,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       mobile: mobile,
       dob: dob,
       password: password,
+      firebaseIdToken: firebaseIdToken,
+    );
+  }
+
+  @override
+  Future<bool> resetPasswordWithPhone({
+    required String phone,
+    required String newPassword,
+    required String firebaseIdToken,
+  }) {
+    return authService.resetPasswordWithPhone(
+      phone: phone,
+      newPassword: newPassword,
       firebaseIdToken: firebaseIdToken,
     );
   }

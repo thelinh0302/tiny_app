@@ -243,6 +243,50 @@ class AuthService {
     }
   }
 
+  Future<bool> resetPasswordWithPhone({
+    required String phone,
+    required String newPassword,
+    required String firebaseIdToken,
+  }) async {
+    try {
+      final normalizedPhone = PhoneUtils.normalizeVietnamPhone(phone);
+
+      final response = await dioClient.post(
+        '/auth/reset-password/phone',
+        data: <String, dynamic>{
+          'phone': normalizedPhone,
+          'newPassword': newPassword,
+          'firebaseIdToken': firebaseIdToken,
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        throw ServerException(
+          'Failed to reset password: ${response.statusCode ?? 'unknown status'}',
+        );
+      }
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw NetworkException('Connection timeout');
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw NetworkException('No internet connection');
+      } else {
+        final message =
+            e.response?.statusMessage ??
+            e.message ??
+            'Failed to reset password';
+        throw ServerException(message);
+      }
+    } on SocketException catch (e) {
+      throw NetworkException(e.message);
+    } catch (e) {
+      throw ServerException('Unexpected reset password error: $e');
+    }
+  }
+
   Future<void> logout() async {
     try {
       // Clear stored API tokens

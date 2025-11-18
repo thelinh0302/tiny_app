@@ -102,12 +102,32 @@
       "title": "Verify your phone",
       "subtitle": "Enter the 6-digit code sent to {destination}",
       "instructions": "Please enter the 6-digit code we sent to complete your signup.",
+      "codeLabel": "OTP code",
       "verify": "Verify",
       "resend": "Resend code",
       "messages": {
         "invalidCode": "Please enter a valid 6-digit code",
         "codeResent": "A new code has been sent",
         "verified": "Phone verified"
+      }
+    },
+    "resetPassword": {
+      "request": {
+        "title": "Reset password",
+        "submit": "Send code"
+      },
+      "verify": {
+        "title": "Set a new password",
+        "newPasswordLabel": "New password",
+        "confirmPasswordLabel": "Confirm new password",
+        "submit": "Change password"
+      },
+      "messages": {
+        "requestFailed": "Failed to request password reset",
+        "verifyFailed": "Failed to verify code or reset password",
+        "userNotFound": "No account found for this phone number",
+        "success": "Password reset successfully. Please log in.",
+        "invalidInputs": "Please enter a valid code and matching passwords"
       }
     }
   }

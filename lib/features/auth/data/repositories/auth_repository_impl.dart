@@ -120,6 +120,28 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, bool>> resetPasswordWithPhone({
+    required String phone,
+    required String newPassword,
+    required String firebaseIdToken,
+  }) async {
+    try {
+      final ok = await remote.resetPasswordWithPhone(
+        phone: phone,
+        newPassword: newPassword,
+        firebaseIdToken: firebaseIdToken,
+      );
+      return Right(ok);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure('Unexpected error: ${e.toString()}'));
+    }
+  }
+
+  @override
   Future<Either<Failure, bool>> checkUserExists(
     String email,
     String mobile,

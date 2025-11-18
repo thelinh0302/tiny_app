@@ -17,6 +17,10 @@ class AuthLandingPage extends StatelessWidget {
     Modular.to.navigate('/auth/signup');
   }
 
+  void _goResetPassword() {
+    Modular.to.navigate('/auth/reset-password/request');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,7 +66,7 @@ class AuthLandingPage extends StatelessWidget {
                     width: MediaQuery.of(context).size.width * 0.5,
                     child: LinkButton(
                       text: 'Forgot Password?',
-                      onPressed: _goSignup,
+                      onPressed: _goResetPassword,
                     ),
                   ),
                 ],
