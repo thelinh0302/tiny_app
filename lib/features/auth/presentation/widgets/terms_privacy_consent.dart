@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:finly_app/core/theme/app_colors.dart';
+import 'package:finly_app/core/widgets/app_alert.dart';
 
 /// Reusable consent text widget:
 /// "By continuing, you agree to Terms of Use and Privacy Policy."
@@ -42,12 +43,9 @@ class TermsPrivacyConsent extends StatelessWidget {
                     ..onTap =
                         onTermsTap ??
                         () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'auth.signup.consent.openTerms'.tr(),
-                              ),
-                            ),
+                          AppAlert.info(
+                            context,
+                            'auth.signup.consent.openTerms'.tr(),
                           );
                         },
             ),
@@ -63,12 +61,9 @@ class TermsPrivacyConsent extends StatelessWidget {
                     ..onTap =
                         onPrivacyTap ??
                         () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'auth.signup.consent.openPrivacy'.tr(),
-                              ),
-                            ),
+                          AppAlert.info(
+                            context,
+                            'auth.signup.consent.openPrivacy'.tr(),
                           );
                         },
             ),

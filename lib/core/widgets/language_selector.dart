@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:finly_app/core/widgets/app_alert.dart';
 
 /// Language selector widget for switching between languages
 class LanguageSelector extends StatelessWidget {
@@ -12,12 +13,7 @@ class LanguageSelector extends StatelessWidget {
       tooltip: 'language.select'.tr(),
       onSelected: (Locale locale) {
         context.setLocale(locale);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('language.changed'.tr()),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        AppAlert.success(context, 'language.changed'.tr());
       },
       itemBuilder:
           (BuildContext context) => <PopupMenuEntry<Locale>>[

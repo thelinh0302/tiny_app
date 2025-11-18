@@ -11,6 +11,7 @@ import 'package:finly_app/core/widgets/date_text_field.dart';
 import 'package:finly_app/core/widgets/main_layout.dart';
 import 'package:finly_app/features/auth/presentation/widgets/social_login_button.dart';
 import 'package:finly_app/features/auth/presentation/widgets/terms_privacy_consent.dart';
+import 'package:finly_app/core/widgets/app_alert.dart';
 
 import 'package:finly_app/features/auth/presentation/bloc/signup_bloc.dart';
 import 'package:finly_app/features/auth/presentation/bloc/login_bloc.dart';
@@ -49,9 +50,7 @@ class _SignupPageState extends State<SignupPage> {
               },
             );
           } else if (state.status == SignupStatus.submissionFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage ?? 'Error')),
-            );
+            AppAlert.error(context, state.errorMessage ?? 'Error');
           }
         },
         child: MainLayout(
@@ -185,12 +184,9 @@ class _SignupPageState extends State<SignupPage> {
                             Modular.to.navigate('/user/');
                           } else if (loginState.status ==
                               LoginStatus.submissionFailure) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  loginState.errorMessage ?? 'Login failed',
-                                ),
-                              ),
+                            AppAlert.error(
+                              context,
+                              loginState.errorMessage ?? 'Login failed',
                             );
                           }
                         },

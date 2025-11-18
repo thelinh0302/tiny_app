@@ -11,6 +11,7 @@ import 'package:finly_app/core/widgets/custom_text_field.dart';
 import 'package:finly_app/core/theme/app_colors.dart';
 import 'package:finly_app/features/auth/presentation/widgets/face_id_button.dart';
 import 'package:finly_app/features/auth/presentation/widgets/social_login_button.dart';
+import 'package:finly_app/core/widgets/app_alert.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -36,9 +37,7 @@ class _LoginPageState extends State<LoginPage> {
           if (state.status == LoginStatus.submissionSuccess) {
             Modular.to.navigate('/user/');
           } else if (state.status == LoginStatus.submissionFailure) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.errorMessage ?? 'Login failed')),
-            );
+            AppAlert.error(context, state.errorMessage ?? 'Login failed');
           }
         },
         child: MainLayout(

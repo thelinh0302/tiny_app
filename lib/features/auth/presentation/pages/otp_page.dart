@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:finly_app/core/widgets/app_alert.dart';
 
 import 'package:finly_app/core/constants/app_spacing.dart';
 import 'package:finly_app/core/theme/app_colors.dart';
@@ -78,23 +79,16 @@ class _OtpPageState extends State<OtpPage> {
           if (state.status == OtpStatus.failure) {
             final msg = state.errorMessage ?? 'Error';
             // If the message looks like a localization key, translate it.
-            final textWidget =
-                msg.startsWith('auth.') ? Text(msg.tr()) : Text(msg);
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: textWidget));
+            final text = msg.startsWith('auth.') ? msg.tr() : msg;
+            AppAlert.error(context, text);
           } else if (state.status == OtpStatus.success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('auth.otp.messages.verified'.tr())),
-            );
+            AppAlert.success(context, 'auth.otp.messages.verified'.tr());
             Modular.to.navigate('/auth/login');
           } else if (state.status == OtpStatus.resendSuccess) {
             if (state.verificationId != null) {
               setState(() => _verificationId = state.verificationId!);
             }
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('auth.otp.messages.codeResent'.tr())),
-            );
+            AppAlert.success(context, 'auth.otp.messages.codeResent'.tr());
           }
         },
         child: MainLayout(
