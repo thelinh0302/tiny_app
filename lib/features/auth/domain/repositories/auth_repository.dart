@@ -23,4 +23,6 @@ abstract class AuthRepository {
     required String password,
     required String firebaseIdToken,
   });
+
+  Future<Either<Failure, bool>> checkUserExists(String email, String mobile);
 }

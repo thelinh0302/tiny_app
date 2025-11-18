@@ -5,12 +5,15 @@ import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:finly_app/core/error/exceptions.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:finly_app/core/utils/phone_utils.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:finly_app/core/config/supabase_config.dart';
 import 'package:flutter/services.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:finly_app/core/network/dio_client.dart';
+import 'package:finly_app/core/services/token_storage.dart';
 
 /// Auth Service
 /// - Originally backed by Supabase Auth (email/password)
@@ -21,9 +24,10 @@ import 'package:finly_app/core/network/dio_client.dart';
 class AuthService {
   final ValueNotifier<bool> _isLoggedIn = ValueNotifier<bool>(false);
   final DioClient dioClient;
+  final TokenStorage tokenStorage;
   StreamSubscription<AuthState>? _authSub;
 
-  AuthService({required this.dioClient}) {
+  AuthService({required this.dioClient, required this.tokenStorage}) {
     // TODO: Remove Supabase usage once login & social auth are migrated to API
     final supa = Supabase.instance.client;
     // Initialize current login state
@@ -40,17 +44,54 @@ class AuthService {
 
   Future<bool> login(String email, String password) async {
     try {
-      final supa = Supabase.instance.client;
-      final res = await supa.auth.signInWithPassword(
-        email: email,
-        password: password,
+      // Allow using a Vietnamese phone number (e.g. 0399...) as the login
+      // identifier by normalizing it to E.164 (+84...) when applicable.
+      final normalizedPhone = PhoneUtils.normalizeVietnamPhone(email);
+
+      // Call HTTP API login endpoint via DioClient
+      final response = await dioClient.post(
+        '/auth/login',
+        data: <String, dynamic>{'phone': normalizedPhone, 'password': password},
       );
-      final ok = res.session != null;
-      _isLoggedIn.value = ok;
-      return ok;
-    } on AuthException catch (e) {
-      // Supabase-specific auth error (invalid credentials, etc.)
-      throw ServerException(e.message);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data is Map<String, dynamic>) {
+          final accessToken = data['accessToken'] as String?;
+          final refreshToken = data['refreshToken'] as String?;
+          final expireAt = data['expireAt'] as String?;
+
+          if (accessToken == null || refreshToken == null || expireAt == null) {
+            throw ServerException('Invalid login response from server');
+          }
+
+          await tokenStorage.saveTokens(
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            expireAt: expireAt,
+          );
+
+          _isLoggedIn.value = true;
+          return true;
+        } else {
+          throw ServerException('Unexpected login response format');
+        }
+      } else {
+        throw ServerException(
+          'Failed to login: ${response.statusCode ?? 'unknown status'}',
+        );
+      }
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw NetworkException('Connection timeout');
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw NetworkException('No internet connection');
+      } else {
+        final message =
+            e.response?.statusMessage ?? e.message ?? 'Failed to login';
+        throw ServerException(message);
+      }
     } on SocketException catch (e) {
       throw NetworkException(e.message);
     } catch (e) {
@@ -66,6 +107,9 @@ class AuthService {
     required String password,
   }) async {
     try {
+      // Normalize mobile phone to E.164 (+84...) before sending to backend
+      final normalizedMobile = PhoneUtils.normalizeVietnamPhone(mobile);
+
       // Call your HTTP API for signup using the shared DioClient.
       // Adjust the endpoint path and payload keys to match your backend.
       final response = await dioClient.post(
@@ -73,7 +117,7 @@ class AuthService {
         data: <String, dynamic>{
           'fullName': fullName,
           'email': email,
-          'mobile': mobile,
+          'mobile': normalizedMobile,
           'dob': dob.toIso8601String(),
           'password': password,
         },
@@ -105,6 +149,53 @@ class AuthService {
     }
   }
 
+  /// Check if a user already exists by email and phone.
+  /// Calls `/auth/check-user-exists` with payload:
+  /// { "email": "john@example.com", "phone": "+84123456789" }
+  /// and expects a response: { "exists": false }.
+  Future<bool> checkUserExists({
+    required String email,
+    required String mobile,
+  }) async {
+    try {
+      final normalizedMobile = PhoneUtils.normalizeVietnamPhone(mobile);
+      final response = await dioClient.post(
+        '/auth/check-user-exists',
+        data: <String, dynamic>{'email': email, 'phone': normalizedMobile},
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data is Map<String, dynamic>) {
+          final exists = data['exists'];
+          if (exists is bool) return exists;
+          throw ServerException('Invalid check-user-exists response');
+        }
+        throw ServerException('Unexpected check-user-exists response format');
+      } else {
+        throw ServerException(
+          'Failed to check user exists: ${response.statusCode ?? 'unknown status'}',
+        );
+      }
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw NetworkException('Connection timeout');
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw NetworkException('No internet connection');
+      } else {
+        final message =
+            e.response?.statusMessage ??
+            e.message ??
+            'Failed to check user exists';
+        throw ServerException(message);
+      }
+    } on SocketException catch (e) {
+      throw NetworkException(e.message);
+    } catch (e) {
+      throw ServerException('Unexpected check-user-exists error: $e');
+    }
+  }
+
   Future<bool> signupWithFirebaseToken({
     required String fullName,
     required String email,
@@ -114,18 +205,20 @@ class AuthService {
     required String firebaseIdToken,
   }) async {
     try {
+      // Normalize mobile phone to E.164 (+84...) before sending to backend
+      final normalizedMobile = PhoneUtils.normalizeVietnamPhone(mobile);
+
       final response = await dioClient.post(
         '/auth/signup',
         data: <String, dynamic>{
           'fullName': fullName,
           'email': email,
-          'mobile': mobile,
+          'mobile': normalizedMobile,
           'dob': dob.toIso8601String(),
           'password': password,
           'firebaseIdToken': firebaseIdToken,
         },
       );
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
       } else {
@@ -145,12 +238,17 @@ class AuthService {
         throw ServerException(message);
       }
     } catch (e) {
+      print(e);
       throw ServerException('Unexpected signup error: $e');
     }
   }
 
   Future<void> logout() async {
     try {
+      // Clear stored API tokens
+      await tokenStorage.clearTokens();
+
+      // Also sign out from Supabase (for social logins that still use it)
       final supa = Supabase.instance.client;
       await supa.auth.signOut();
       _isLoggedIn.value = false;
@@ -165,43 +263,94 @@ class AuthService {
 
   Future<bool> signInWithGoogle() async {
     try {
-      final supa = Supabase.instance.client;
+      // 1) Native Google sign-in to get OAuth tokens
+      // Use default GoogleSignIn configuration so it reads client IDs
+      // from GoogleService-Info.plist (iOS) and the platform-specific
+      // configuration without overriding them with potentially mismatched
+      // values.
+      final googleSignIn = GoogleSignIn();
 
-      final googleSignIn = GoogleSignIn(
-        serverClientId: SupabaseConfig.googleWebClientId,
-        // iOS requires explicit clientId (the iOS client ID from Google console).
-        clientId: Platform.isIOS ? SupabaseConfig.googleIOSClientId : null,
-        // scopes: const ['email', 'profile', 'openid'],
-      );
-
-      final account = await googleSignIn.signIn();
-      if (account == null) {
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
         // User canceled the sign-in flow.
         throw ServerException('Google sign-in cancelled');
       }
-      final auth = await account.authentication;
 
-      final idToken = auth.idToken;
-      final accessToken = auth.accessToken;
+      final googleAuth = await googleUser.authentication;
 
-      if (idToken == null || idToken.isEmpty) {
-        throw ServerException('Missing Google ID token');
-      }
-
-      final res = await supa.auth.signInWithIdToken(
-        provider: OAuthProvider.google,
-        idToken: idToken,
-        accessToken: accessToken,
+      // 2) Sign in to Firebase with Google credential
+      final credential = fb.GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
 
-      final ok = res.session != null;
-      _isLoggedIn.value = ok;
-      return ok;
-    } on AuthException catch (e) {
-      print(e.message);
-      throw ServerException(e.message);
+      final firebaseAuth = fb.FirebaseAuth.instance;
+      final userCred = await firebaseAuth.signInWithCredential(credential);
+      final user = userCred.user;
+
+      if (user == null) {
+        throw ServerException('Failed to sign in with Google');
+      }
+
+      final firebaseIdToken = await user.getIdToken(true);
+      if (firebaseIdToken == null || firebaseIdToken.isEmpty) {
+        throw ServerException('Missing Firebase ID token');
+      }
+
+      // Optionally sign out from Firebase to avoid persisting parallel auth state
+      await firebaseAuth.signOut();
+
+      // 3) Call backend API with Firebase ID token
+      final response = await dioClient.post(
+        '/auth/google/login',
+        data: <String, dynamic>{'firebaseIdToken': firebaseIdToken},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data is Map<String, dynamic>) {
+          final accessToken = data['accessToken'] as String?;
+          final refreshToken = data['refreshToken'] as String?;
+          final expireAt = data['expireAt'] as String?;
+
+          if (accessToken == null || refreshToken == null || expireAt == null) {
+            throw ServerException('Invalid Google login response from server');
+          }
+
+          await tokenStorage.saveTokens(
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            expireAt: expireAt,
+          );
+
+          _isLoggedIn.value = true;
+          return true;
+        } else {
+          throw ServerException('Unexpected Google login response format');
+        }
+      } else {
+        throw ServerException(
+          'Failed to login with Google: ${response.statusCode ?? 'unknown status'}',
+        );
+      }
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw NetworkException('Connection timeout');
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw NetworkException('No internet connection');
+      } else {
+        final message =
+            e.response?.statusMessage ??
+            e.message ??
+            'Failed to login with Google';
+        throw ServerException(message);
+      }
+    } on fb.FirebaseAuthException catch (e) {
+      throw ServerException(
+        e.message ?? 'Firebase auth error during Google sign-in',
+      );
     } on PlatformException catch (e) {
-      print(e.message);
       throw ServerException(
         'Google Sign-In failed: ${e.code} ${e.message ?? ''}',
       );
@@ -287,16 +436,57 @@ class AuthService {
         throw ServerException('Biometric authentication failed or cancelled');
       }
 
-      // Unlock only if there is an existing Supabase session.
-      final supa = Supabase.instance.client;
-      final ok = supa.auth.currentSession != null;
-      if (!ok) {
+      // Use stored refresh token to obtain a new access token via API
+      final storedRefreshToken = await tokenStorage.getRefreshToken();
+      if (storedRefreshToken == null || storedRefreshToken.isEmpty) {
         throw ServerException(
           'No active session found. Please login once to enable Face ID.',
         );
       }
-      _isLoggedIn.value = ok;
-      return ok;
+
+      final response = await dioClient.post(
+        '/auth/refresh',
+        data: <String, dynamic>{'refreshToken': storedRefreshToken},
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data;
+        if (data is Map<String, dynamic>) {
+          final accessToken = data['accessToken'] as String?;
+          final refreshToken = data['refreshToken'] as String?;
+          final expireAt = data['expireAt'] as String?;
+
+          if (accessToken == null || refreshToken == null || expireAt == null) {
+            throw ServerException('Invalid refresh response from server');
+          }
+
+          await tokenStorage.saveTokens(
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+            expireAt: expireAt,
+          );
+
+          _isLoggedIn.value = true;
+          return true;
+        } else {
+          throw ServerException('Unexpected refresh response format');
+        }
+      } else {
+        throw ServerException(
+          'Failed to refresh session: ${response.statusCode ?? 'unknown status'}',
+        );
+      }
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        throw NetworkException('Connection timeout');
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw NetworkException('No internet connection');
+      } else {
+        final message =
+            e.response?.statusMessage ?? e.message ?? 'Failed to refresh';
+        throw ServerException(message);
+      }
     } on PlatformException catch (e) {
       throw ServerException('Biometric error: ${e.code} ${e.message ?? ''}');
     } on SocketException catch (e) {

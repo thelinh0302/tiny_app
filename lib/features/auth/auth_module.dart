@@ -8,6 +8,7 @@ import 'presentation/pages/signup_page.dart';
 import 'presentation/pages/otp_page.dart';
 import 'presentation/bloc/login_bloc.dart';
 import 'presentation/bloc/signup_bloc.dart';
+import 'presentation/bloc/otp_bloc.dart';
 
 // Domain
 import 'domain/repositories/auth_repository.dart';
@@ -17,6 +18,7 @@ import 'domain/usecases/login_with_google.dart';
 import 'domain/usecases/login_with_facebook.dart';
 import 'domain/usecases/login_with_biometrics.dart';
 import 'domain/usecases/signup_with_firebase_token.dart';
+import 'domain/usecases/check_user_exists.dart';
 
 // Data
 import 'data/datasources/auth_remote_data_source.dart';
@@ -48,6 +50,9 @@ class AuthModule extends Module {
     i.addLazySingleton<LoginWithBiometrics>(
       () => LoginWithBiometrics(i.get<AuthRepository>()),
     );
+    i.addLazySingleton<CheckUserExists>(
+      () => CheckUserExists(i.get<AuthRepository>()),
+    );
 
     // Bloc
     i.add<LoginBloc>(
@@ -62,10 +67,18 @@ class AuthModule extends Module {
       () => SignupBloc(
         signup: i.get<Signup>(),
         phoneAuth: Modular.get(), // PhoneAuthService
+        checkUserExists: i.get<CheckUserExists>(),
       ),
     );
+
     i.addLazySingleton<SignupWithFirebaseToken>(
       () => SignupWithFirebaseToken(i.get<AuthRepository>()),
+    );
+    i.add<OtpBloc>(
+      () => OtpBloc(
+        phoneAuth: Modular.get(), // PhoneAuthService
+        signupWithFirebaseToken: i.get<SignupWithFirebaseToken>(),
+      ),
     );
   }
 

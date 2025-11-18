@@ -74,8 +74,8 @@ class _LoginPageState extends State<LoginPage> {
                     children: [
                       AppSpacing.verticalSpaceXLarge,
                       CustomTextField(
-                        labelText: 'auth.login.emailOrUsername'.tr(),
-                        keyboardType: TextInputType.emailAddress,
+                        labelText: 'auth.login.phoneNumber'.tr(),
+                        keyboardType: TextInputType.phone,
                         onChanged:
                             (v) => BlocProvider.of<LoginBloc>(
                               context,
@@ -84,8 +84,8 @@ class _LoginPageState extends State<LoginPage> {
                             state.email.displayError != null
                                 ? (state.email.displayError ==
                                         EmailValidationError.empty
-                                    ? 'auth.login.validation.emailRequired'.tr()
-                                    : 'auth.login.validation.emailInvalid'.tr())
+                                    ? 'auth.login.validation.phoneRequired'.tr()
+                                    : 'auth.login.validation.phoneInvalid'.tr())
                                 : null,
                       ),
                       AppSpacing.verticalSpaceXLarge,

@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:formz/formz.dart';
 
 import 'package:finly_app/features/auth/domain/usecases/signup.dart' as usecase;
+import 'package:finly_app/features/auth/domain/usecases/check_user_exists.dart'
+    as exists_usecase;
 import 'package:finly_app/features/auth/presentation/models/login_inputs.dart';
 import 'package:finly_app/features/auth/presentation/models/signup_inputs.dart';
 import 'package:finly_app/core/services/phone_auth_service.dart';
@@ -13,9 +15,13 @@ part 'signup_state.dart';
 class SignupBloc extends Bloc<SignupEvent, SignupState> {
   final usecase.Signup signup;
   final PhoneAuthService phoneAuth;
+  final exists_usecase.CheckUserExists checkUserExists;
 
-  SignupBloc({required this.signup, required this.phoneAuth})
-    : super(const SignupState()) {
+  SignupBloc({
+    required this.signup,
+    required this.phoneAuth,
+    required this.checkUserExists,
+  }) : super(const SignupState()) {
     on<SignupFullNameChanged>(_onFullNameChanged);
     on<SignupEmailChanged>(_onEmailChanged);
     on<SignupMobileChanged>(_onMobileChanged);
@@ -124,6 +130,40 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     if (!isValid) return;
 
     emit(state.copyWith(status: SignupStatus.otpSending, errorMessage: null));
+
+    // Check existing user first
+    final existsResult = await checkUserExists(
+      exists_usecase.CheckUserExistsParams(
+        email: email.value.trim(),
+        mobile: mobile.value.trim(),
+      ),
+    );
+
+    var canProceed = false;
+    existsResult.fold(
+      (failure) {
+        emit(
+          state.copyWith(
+            status: SignupStatus.submissionFailure,
+            errorMessage: failure.message,
+          ),
+        );
+      },
+      (exists) {
+        if (exists) {
+          emit(
+            state.copyWith(
+              status: SignupStatus.submissionFailure,
+              errorMessage: 'Account already exists for this email/phone',
+            ),
+          );
+        } else {
+          canProceed = true;
+        }
+      },
+    );
+
+    if (!canProceed) return;
 
     try {
       final verificationId = await phoneAuth.sendCode(mobile.value.trim());

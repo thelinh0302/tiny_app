@@ -118,4 +118,21 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure('Unexpected error: ${e.toString()}'));
     }
   }
+
+  @override
+  Future<Either<Failure, bool>> checkUserExists(
+    String email,
+    String mobile,
+  ) async {
+    try {
+      final exists = await remote.checkUserExists(email: email, mobile: mobile);
+      return Right(exists);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } on NetworkException catch (e) {
+      return Left(NetworkFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure('Unexpected error: ${e.toString()}'));
+    }
+  }
 }

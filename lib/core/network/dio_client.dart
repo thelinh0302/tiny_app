@@ -1,16 +1,20 @@
 import 'package:dio/dio.dart';
 
+import '../config/api_config.dart';
+import '../services/token_storage.dart';
+
 /// Dio client configuration
 /// Centralized HTTP client setup following Single Responsibility Principle
 class DioClient {
   final Dio dio;
+  final TokenStorage? tokenStorage;
 
-  DioClient({Dio? dio})
+  DioClient({Dio? dio, this.tokenStorage})
     : dio =
           dio ??
           Dio(
             BaseOptions(
-              baseUrl: 'https://jsonplaceholder.typicode.com',
+              baseUrl: ApiConfig.baseUrl,
               connectTimeout: const Duration(seconds: 30),
               receiveTimeout: const Duration(seconds: 30),
               headers: {
@@ -25,7 +29,15 @@ class DioClient {
   void _initializeInterceptors() {
     dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
+        onRequest: (options, handler) async {
+          // Attach Authorization header if we have an access token
+          if (tokenStorage != null) {
+            final accessToken = await tokenStorage!.getAccessToken();
+            if (accessToken != null && accessToken.isNotEmpty) {
+              options.headers['Authorization'] = 'Bearer $accessToken';
+            }
+          }
+
           // Log request
           print('🚀 REQUEST[${options.method}] => ${options.uri}');
           return handler.next(options);

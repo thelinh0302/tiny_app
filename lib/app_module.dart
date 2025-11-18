@@ -2,6 +2,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'core/network/dio_client.dart';
 import 'core/services/auth_service.dart';
 import 'core/services/phone_auth_service.dart';
+import 'core/services/token_storage.dart';
 import 'core/guards/auth_guard.dart';
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/auth/auth_module.dart';
@@ -12,12 +13,20 @@ import 'features/user/user_module.dart';
 class AppModule extends Module {
   @override
   void binds(Injector i) {
+    // Core - Storage
+    i.addLazySingleton<TokenStorage>(() => const TokenStorage());
+
     // Core - Network
-    i.addLazySingleton<DioClient>(() => DioClient());
+    i.addLazySingleton<DioClient>(
+      () => DioClient(tokenStorage: i.get<TokenStorage>()),
+    );
 
     // Services
     i.addLazySingleton<AuthService>(
-      () => AuthService(dioClient: i.get<DioClient>()),
+      () => AuthService(
+        dioClient: i.get<DioClient>(),
+        tokenStorage: i.get<TokenStorage>(),
+      ),
     );
     i.addLazySingleton<PhoneAuthService>(() => PhoneAuthService());
   }

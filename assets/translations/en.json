@@ -50,6 +50,7 @@
     "login": {
       "title": "Welcome",
       "emailOrUsername": "Username or Email",
+      "phoneNumber": "Phone number",
       "password": "Password",
       "forgotPassword": "Forgot Password?",
       "noAccountPrefix": "Don’t have an account? ",
@@ -57,7 +58,9 @@
         "emailRequired": "Email is required",
         "emailInvalid": "Invalid email",
         "passwordRequired": "Password is required",
-        "passwordTooShort": "Password too short"
+        "passwordTooShort": "Password too short",
+        "phoneRequired": "Phone number is required",
+        "phoneInvalid": "Invalid phone number"
       }
     },
     "signup": {

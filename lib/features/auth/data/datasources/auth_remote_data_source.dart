@@ -22,6 +22,8 @@ abstract class AuthRemoteDataSource {
     required String password,
     required String firebaseIdToken,
   });
+
+  Future<bool> checkUserExists({required String email, required String mobile});
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -83,5 +85,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       password: password,
       firebaseIdToken: firebaseIdToken,
     );
+  }
+
+  @override
+  Future<bool> checkUserExists({
+    required String email,
+    required String mobile,
+  }) {
+    return authService.checkUserExists(email: email, mobile: mobile);
   }
 }

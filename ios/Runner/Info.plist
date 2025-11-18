@@ -69,5 +69,9 @@
 				</array>
 			</dict>
 		</array>
+
+		<!-- Google Sign-In iOS client ID (must match CLIENT_ID in GoogleService-Info.plist) -->
+		<key>GIDClientID</key>
+		<string>822867620295-hcnfqlgq7thhapn0uuq7659uqj8ho964.apps.googleusercontent.com</string>
 	</dict>
 </plist>

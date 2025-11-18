@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:finly_app/core/utils/phone_utils.dart';
 
 /// PhoneAuthService wraps Firebase Phone Authentication to:
 /// - send OTP to a phone number and return the verificationId
@@ -17,11 +18,17 @@ class PhoneAuthService {
 
   /// Sends an OTP code to the given [phoneNumber] and resolves with verificationId
   /// when the code is sent. Throws if any Firebase auth error occurs.
+  ///
+  /// The [phoneNumber] will be normalized to Vietnamese E.164 format
+  /// using [PhoneUtils.normalizeVietnamPhone] so that values such as
+  /// `0399...` become `+84399...`.
   Future<String> sendCode(String phoneNumber) async {
     final completer = Completer<String>();
 
+    final normalized = PhoneUtils.normalizeVietnamPhone(phoneNumber);
+
     await _auth.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
+      phoneNumber: normalized,
       timeout: const Duration(seconds: 60),
       verificationCompleted: (PhoneAuthCredential credential) {
         // On some Android devices, auto-verification can happen here.

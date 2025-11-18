@@ -50,6 +50,7 @@
     "login": {
       "title": "Chào mừng",
       "emailOrUsername": "Tên đăng nhập hoặc Email",
+      "phoneNumber": "Số điện thoại",
       "password": "Mật khẩu",
       "forgotPassword": "Quên mật khẩu?",
       "noAccountPrefix": "Chưa có tài khoản? ",
@@ -57,7 +58,9 @@
         "emailRequired": "Email là bắt buộc",
         "emailInvalid": "Email không hợp lệ",
         "passwordRequired": "Mật khẩu là bắt buộc",
-        "passwordTooShort": "Mật khẩu quá ngắn"
+        "passwordTooShort": "Mật khẩu quá ngắn",
+        "phoneRequired": "Số điện thoại là bắt buộc",
+        "phoneInvalid": "Số điện thoại không hợp lệ"
       }
     },
     "signup": {
