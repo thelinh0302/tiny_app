@@ -8,6 +8,7 @@ import 'package:finly_app/core/theme/app_colors.dart';
 import 'package:finly_app/core/widgets/custom_button.dart';
 import 'package:finly_app/core/widgets/custom_text_field.dart';
 import 'package:finly_app/core/widgets/main_layout.dart';
+import 'package:finly_app/core/widgets/phone_text_field.dart';
 import 'package:finly_app/core/widgets/app_alert.dart';
 import 'package:finly_app/features/auth/presentation/bloc/reset_password_request_bloc.dart';
 import 'package:finly_app/features/auth/presentation/models/login_inputs.dart';
@@ -90,9 +91,10 @@ class _ResetPasswordRequestPageState extends State<ResetPasswordRequestPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     AppSpacing.verticalSpaceXLarge,
-                    CustomTextField(
+                    PhoneTextField(
                       labelText: 'auth.login.phoneNumber'.tr(),
-                      keyboardType: TextInputType.phone,
+                      hintText:
+                          'auth.resetPassword.placeholders.phoneNumber'.tr(),
                       onChanged: (v) => bloc.add(ResetPasswordPhoneChanged(v)),
                       errorText: phoneError,
                     ),

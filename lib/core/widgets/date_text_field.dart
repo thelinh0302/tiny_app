@@ -7,6 +7,7 @@ typedef DateFormatter = String Function(DateTime date);
 class DateTextField extends StatefulWidget {
   final TextEditingController? controller;
   final String? labelText;
+  final String? hintText;
   final Widget? prefixIcon;
   final Widget? suffixIcon;
 
@@ -30,6 +31,7 @@ class DateTextField extends StatefulWidget {
     super.key,
     this.controller,
     this.labelText,
+    this.hintText,
     this.prefixIcon,
     this.suffixIcon,
     this.initialDate,
@@ -151,6 +153,7 @@ class _DateTextFieldState extends State<DateTextField> {
     return CustomTextField(
       controller: _controller,
       labelText: widget.labelText,
+      hintText: widget.hintText,
       prefixIcon: widget.prefixIcon,
       // Ensure calendar icon is shown; if a custom suffix is provided, use it.
       suffixIcon:

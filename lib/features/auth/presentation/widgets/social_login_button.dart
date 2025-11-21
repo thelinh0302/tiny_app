@@ -5,14 +5,12 @@ import 'package:finly_app/core/theme/app_colors.dart';
 
 class SocialLogin extends StatelessWidget {
   final VoidCallback onGooglePressed;
-  final VoidCallback onFacebookPressed;
   final double buttonSize;
   final double iconSize;
 
   const SocialLogin({
     super.key,
     required this.onGooglePressed,
-    required this.onFacebookPressed,
     this.buttonSize = 56,
     this.iconSize = 28,
   });
@@ -31,16 +29,16 @@ class SocialLogin extends StatelessWidget {
             height: iconSize,
           ),
         ),
-        AppSpacing.horizontalSpaceMedium,
-        _SocialCircleButton(
-          onPressed: onFacebookPressed,
-          size: buttonSize,
-          child: AppImages.image(
-            AppImages.facebook,
-            width: iconSize,
-            height: iconSize,
-          ),
-        ),
+        // AppSpacing.horizontalSpaceMedium,
+        // _SocialCircleButton(
+        //   onPressed: onFacebookPressed,
+        //   size: buttonSize,
+        //   child: AppImages.image(
+        //     AppImages.facebook,
+        //     width: iconSize,
+        //     height: iconSize,
+        //   ),
+        // ),
       ],
     );
   }

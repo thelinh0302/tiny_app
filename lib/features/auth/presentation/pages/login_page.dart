@@ -8,6 +8,7 @@ import 'package:finly_app/features/auth/presentation/bloc/login_bloc.dart';
 import 'package:finly_app/features/auth/presentation/models/login_inputs.dart';
 import 'package:finly_app/core/widgets/main_layout.dart';
 import 'package:finly_app/core/widgets/custom_text_field.dart';
+import 'package:finly_app/core/widgets/phone_text_field.dart';
 import 'package:finly_app/core/theme/app_colors.dart';
 import 'package:finly_app/features/auth/presentation/widgets/face_id_button.dart';
 import 'package:finly_app/features/auth/presentation/widgets/social_login_button.dart';
@@ -72,9 +73,9 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       AppSpacing.verticalSpaceXLarge,
-                      CustomTextField(
+                      PhoneTextField(
                         labelText: 'auth.login.phoneNumber'.tr(),
-                        keyboardType: TextInputType.phone,
+                        hintText: 'auth.login.placeholders.phoneNumber'.tr(),
                         onChanged:
                             (v) => BlocProvider.of<LoginBloc>(
                               context,
@@ -90,6 +91,7 @@ class _LoginPageState extends State<LoginPage> {
                       AppSpacing.verticalSpaceXLarge,
                       CustomTextField(
                         labelText: 'auth.login.password'.tr(),
+                        hintText: 'auth.login.placeholders.password'.tr(),
                         suffixIcon: IconButton(
                           icon: Icon(
                             state.obscure
@@ -160,11 +162,6 @@ class _LoginPageState extends State<LoginPage> {
                           BlocProvider.of<LoginBloc>(
                             context,
                           ).add(const LoginWithGooglePressed());
-                        },
-                        onFacebookPressed: () {
-                          BlocProvider.of<LoginBloc>(
-                            context,
-                          ).add(const LoginWithFacebookPressed());
                         },
                       ),
                       AppSpacing.verticalSpaceXLarge,

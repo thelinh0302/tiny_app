@@ -47,7 +47,6 @@ class AuthService {
       // Allow using a Vietnamese phone number (e.g. 0399...) as the login
       // identifier by normalizing it to E.164 (+84...) when applicable.
       final normalizedPhone = PhoneUtils.normalizeVietnamPhone(phone);
-
       // Call HTTP API login endpoint via DioClient
       final response = await dioClient.post(
         '/auth/login',
@@ -207,6 +206,7 @@ class AuthService {
     try {
       // Normalize mobile phone to E.164 (+84...) before sending to backend
       final normalizedMobile = PhoneUtils.normalizeVietnamPhone(mobile);
+      print(normalizedMobile);
 
       final response = await dioClient.post(
         '/auth/signup',

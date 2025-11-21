@@ -54,6 +54,10 @@
       "password": "Password",
       "forgotPassword": "Forgot Password?",
       "noAccountPrefix": "Don’t have an account? ",
+      "placeholders": {
+        "phoneNumber": "Enter your phone number",
+        "password": "Enter your password"
+      },
       "validation": {
         "emailRequired": "Email is required",
         "emailInvalid": "Invalid email",
@@ -71,6 +75,14 @@
         "dob": "Date of Birth",
         "password": "Password",
         "confirmPassword": "Confirm password"
+      },
+      "placeholders": {
+        "fullName": "Enter your full name",
+        "email": "Enter your email address",
+        "mobile": "Enter your mobile number",
+        "dob": "Select your date of birth",
+        "password": "Create a password",
+        "confirmPassword": "Re-enter your password"
       },
       "validation": {
         "fullNameRequired": "Full name is required",
@@ -121,6 +133,11 @@
         "newPasswordLabel": "New password",
         "confirmPasswordLabel": "Confirm new password",
         "submit": "Change password"
+      },
+      "placeholders": {
+        "phoneNumber": "Enter the phone number for your account",
+        "newPassword": "Enter a new password",
+        "confirmNewPassword": "Re-enter your new password"
       },
       "messages": {
         "requestFailed": "Failed to request password reset",

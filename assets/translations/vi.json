@@ -54,6 +54,10 @@
       "password": "Mật khẩu",
       "forgotPassword": "Quên mật khẩu?",
       "noAccountPrefix": "Chưa có tài khoản? ",
+      "placeholders": {
+        "phoneNumber": "Nhập số điện thoại của bạn",
+        "password": "Nhập mật khẩu của bạn"
+      },
       "validation": {
         "emailRequired": "Email là bắt buộc",
         "emailInvalid": "Email không hợp lệ",
@@ -71,6 +75,14 @@
         "dob": "Ngày sinh",
         "password": "Mật khẩu",
         "confirmPassword": "Xác nhận mật khẩu"
+      },
+      "placeholders": {
+        "fullName": "Nhập họ và tên của bạn",
+        "email": "Nhập địa chỉ email của bạn",
+        "mobile": "Nhập số điện thoại của bạn",
+        "dob": "Chọn ngày sinh của bạn",
+        "password": "Tạo mật khẩu",
+        "confirmPassword": "Nhập lại mật khẩu"
       },
       "validation": {
         "fullNameRequired": "Họ và tên là bắt buộc",
@@ -121,6 +133,11 @@
         "newPasswordLabel": "Mật khẩu mới",
         "confirmPasswordLabel": "Xác nhận mật khẩu mới",
         "submit": "Đổi mật khẩu"
+      },
+      "placeholders": {
+        "phoneNumber": "Nhập số điện thoại tài khoản của bạn",
+        "newPassword": "Nhập mật khẩu mới",
+        "confirmNewPassword": "Nhập lại mật khẩu mới"
       },
       "messages": {
         "requestFailed": "Yêu cầu đặt lại mật khẩu thất bại",

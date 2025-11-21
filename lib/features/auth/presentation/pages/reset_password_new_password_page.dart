@@ -100,6 +100,8 @@ class _ResetPasswordNewPasswordPageState
                     CustomTextField(
                       labelText:
                           'auth.resetPassword.verify.newPasswordLabel'.tr(),
+                      hintText:
+                          'auth.resetPassword.placeholders.newPassword'.tr(),
                       obscureText: true,
                       onChanged:
                           (v) => bloc.add(ResetPasswordNewPasswordChanged(v)),
@@ -110,6 +112,9 @@ class _ResetPasswordNewPasswordPageState
                     CustomTextField(
                       labelText:
                           'auth.resetPassword.verify.confirmPasswordLabel'.tr(),
+                      hintText:
+                          'auth.resetPassword.placeholders.confirmNewPassword'
+                              .tr(),
                       obscureText: true,
                       onChanged:
                           (v) => bloc.add(

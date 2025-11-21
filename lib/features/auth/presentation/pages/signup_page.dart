@@ -9,6 +9,7 @@ import 'package:finly_app/core/widgets/custom_button.dart';
 import 'package:finly_app/core/widgets/custom_text_field.dart';
 import 'package:finly_app/core/widgets/date_text_field.dart';
 import 'package:finly_app/core/widgets/main_layout.dart';
+import 'package:finly_app/core/widgets/phone_text_field.dart';
 import 'package:finly_app/features/auth/presentation/widgets/social_login_button.dart';
 import 'package:finly_app/features/auth/presentation/widgets/terms_privacy_consent.dart';
 import 'package:finly_app/core/widgets/app_alert.dart';
@@ -89,6 +90,7 @@ class _SignupPageState extends State<SignupPage> {
                     // Full name
                     CustomTextField(
                       labelText: 'auth.signup.labels.fullName'.tr(),
+                      hintText: 'auth.signup.placeholders.fullName'.tr(),
                       keyboardType: TextInputType.name,
                       onChanged: (v) => bloc.add(SignupFullNameChanged(v)),
                       errorText:
@@ -100,15 +102,16 @@ class _SignupPageState extends State<SignupPage> {
                     // Email
                     CustomTextField(
                       labelText: 'auth.signup.labels.email'.tr(),
+                      hintText: 'auth.signup.placeholders.email'.tr(),
                       keyboardType: TextInputType.emailAddress,
                       onChanged: (v) => bloc.add(SignupEmailChanged(v)),
                       errorText: emailErrorText(state.email),
                     ),
                     AppSpacing.verticalSpaceXLarge,
                     // Mobile
-                    CustomTextField(
+                    PhoneTextField(
                       labelText: 'auth.signup.labels.mobile'.tr(),
-                      keyboardType: TextInputType.phone,
+                      hintText: 'auth.signup.placeholders.mobile'.tr(),
                       onChanged: (v) => bloc.add(SignupMobileChanged(v)),
                       errorText: mobileErrorText(state.mobile),
                     ),
@@ -116,6 +119,7 @@ class _SignupPageState extends State<SignupPage> {
                     // DOB
                     DateTextField(
                       labelText: 'auth.signup.labels.dob'.tr(),
+                      hintText: 'auth.signup.placeholders.dob'.tr(),
                       firstDate: DateTime(1900),
                       lastDate: DateTime.now(),
                       onDateChanged: (d) => bloc.add(SignupDobChanged(d)),
@@ -125,6 +129,7 @@ class _SignupPageState extends State<SignupPage> {
                     // Password
                     CustomTextField(
                       labelText: 'auth.signup.labels.password'.tr(),
+                      hintText: 'auth.signup.placeholders.password'.tr(),
                       obscureText: state.obscurePassword,
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -143,6 +148,7 @@ class _SignupPageState extends State<SignupPage> {
                     // Confirm Password
                     CustomTextField(
                       labelText: 'auth.signup.labels.confirmPassword'.tr(),
+                      hintText: 'auth.signup.placeholders.confirmPassword'.tr(),
                       obscureText: state.obscureConfirm,
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -196,11 +202,11 @@ class _SignupPageState extends State<SignupPage> {
                               context,
                             ).add(const LoginWithGooglePressed());
                           },
-                          onFacebookPressed: () {
-                            BlocProvider.of<LoginBloc>(
-                              context,
-                            ).add(const LoginWithFacebookPressed());
-                          },
+                          // onFacebookPressed: () {
+                          //   BlocProvider.of<LoginBloc>(
+                          //     context,
+                          //   ).add(const LoginWithFacebookPressed());
+                          // },
                         ),
                       ),
                     ),
