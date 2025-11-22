@@ -42,6 +42,36 @@ class AuthService {
   bool get isLoggedIn => _isLoggedIn.value;
   ValueListenable<bool> get isLoggedInListenable => _isLoggedIn;
 
+  /// Restore login state from stored API tokens.
+  /// Returns true if we have a non-expired access token.
+  Future<bool> restoreSessionFromStorage() async {
+    try {
+      final accessToken = await tokenStorage.getAccessToken();
+      final expireAtStr = await tokenStorage.getExpireAt();
+
+      if (accessToken == null || accessToken.isEmpty) {
+        _isLoggedIn.value = false;
+        return false;
+      }
+
+      if (expireAtStr != null) {
+        final expireAt = DateTime.tryParse(expireAtStr);
+        if (expireAt != null && expireAt.isBefore(DateTime.now().toUtc())) {
+          // Token expired, treat as logged out and clear stored tokens.
+          _isLoggedIn.value = false;
+          await tokenStorage.clearTokens();
+          return false;
+        }
+      }
+
+      _isLoggedIn.value = true;
+      return true;
+    } catch (_) {
+      _isLoggedIn.value = false;
+      return false;
+    }
+  }
+
   Future<bool> login(String phone, String password) async {
     try {
       // Allow using a Vietnamese phone number (e.g. 0399...) as the login

@@ -15,6 +15,14 @@ class AppImages {
   static const String google = '$_base/google.png';
   static const String facebook = '$_base/facebook.png';
 
+  // Bottom navigation icons (SVG)
+  static const String navHome = '$_base/home_icon.svg';
+  static const String navTransactions = '$_base/vector_icon.svg';
+  static const String navCategory = '$_base/category_icon.svg';
+  static const String navAnalytics = '$_base/analysis_icon.svg';
+  static const String navSetting = '$_base/setting_icon.svg';
+  static const String navProfile = '$_base/profile_icon.svg';
+
   // Example placeholders (add your PNGs/SVGs here)
   // static const String logoPng = '$_base/logo.png';
   // static const String iconSvg = '$_base/icon.svg';

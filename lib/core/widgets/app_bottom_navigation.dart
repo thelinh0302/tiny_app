@@ -1,12 +1,15 @@
+import 'package:circle_nav_bar/circle_nav_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+
+import '../constants/app_images.dart';
 import '../theme/app_colors.dart';
 
-/// Reusable bottom navigation bar widget
-/// Following Single Responsibility Principle
+/// Reusable bottom navigation bar widget based on `CircleNavBar`
+/// Keeps the same API (`currentIndex`, `onTap`) as the previous
+/// `BottomNavigationBar` implementation.
 class AppBottomNavigation extends StatelessWidget {
   final int currentIndex;
-  final Function(int) onTap;
+  final ValueChanged<int> onTap;
 
   const AppBottomNavigation({
     super.key,
@@ -16,38 +19,101 @@ class AppBottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
+    Widget buildIcon({
+      required String asset,
+      required Color color,
+      required bool isActive,
+    }) {
+      // CircleNavBar tends to make the central circle feel large.
+      // We counter this by scaling the icon down so it looks lighter.
+      final double baseSize = isActive ? 40 : 35;
+      final double scale = isActive ? 0.48 : 0.5;
+
+      return Transform.scale(
+        scale: scale,
+        child: AppImages.image(
+          asset,
+          color: color,
+          width: baseSize,
+          height: baseSize,
+        ),
+      );
+    }
+
+    return CircleNavBar(
+      activeIndex: currentIndex,
       onTap: onTap,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: AppColors.mainGreen,
-      unselectedItemColor: AppColors.grey,
-      selectedFontSize: 12,
-      unselectedFontSize: 12,
-      backgroundColor: AppColors.white,
-      elevation: 8,
-      items: [
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.home_outlined),
-          activeIcon: const Icon(Icons.home),
-          label: 'nav.home'.tr(),
+      activeIcons: [
+        buildIcon(
+          asset: AppImages.navHome,
+          color: AppColors.white,
+          isActive: true,
         ),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.search_outlined),
-          activeIcon: const Icon(Icons.search),
-          label: 'nav.search'.tr(),
+        buildIcon(
+          asset: AppImages.navAnalytics,
+          color: AppColors.white,
+          isActive: true,
         ),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.favorite_outline),
-          activeIcon: const Icon(Icons.favorite),
-          label: 'nav.favorites'.tr(),
+        buildIcon(
+          asset: AppImages.navTransactions,
+          color: AppColors.white,
+          isActive: true,
         ),
-        BottomNavigationBarItem(
-          icon: const Icon(Icons.person_outline),
-          activeIcon: const Icon(Icons.person),
-          label: 'nav.profile'.tr(),
+        buildIcon(
+          asset: AppImages.navCategory,
+          color: AppColors.white,
+          isActive: true,
+        ),
+        buildIcon(
+          asset: AppImages.navSetting,
+          color: AppColors.white,
+          isActive: true,
+        ),
+        buildIcon(
+          asset: AppImages.navProfile,
+          color: AppColors.white,
+          isActive: true,
         ),
       ],
+      inactiveIcons: [
+        buildIcon(
+          asset: AppImages.navHome,
+          color: AppColors.white,
+          isActive: true,
+        ),
+        buildIcon(
+          asset: AppImages.navAnalytics,
+          color: AppColors.white,
+          isActive: true,
+        ),
+        buildIcon(
+          asset: AppImages.navTransactions,
+          color: AppColors.white,
+          isActive: true,
+        ),
+        buildIcon(
+          asset: AppImages.navCategory,
+          color: AppColors.white,
+          isActive: true,
+        ),
+        buildIcon(
+          asset: AppImages.navSetting,
+          color: AppColors.white,
+          isActive: true,
+        ),
+        buildIcon(
+          asset: AppImages.navProfile,
+          color: AppColors.white,
+          isActive: true,
+        ),
+      ],
+      circleColor: AppColors.mainGreen,
+      color: AppColors.mainGreen,
+      elevation: 6,
+      height: 84,
+      circleWidth: 62,
+      shadowColor: Colors.black12,
+      circleShadowColor: Colors.black26,
     );
   }
 }

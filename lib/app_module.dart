@@ -7,6 +7,7 @@ import 'core/guards/auth_guard.dart';
 import 'features/onboarding/presentation/pages/onboarding_page.dart';
 import 'features/auth/auth_module.dart';
 import 'features/user/user_module.dart';
+import 'features/dashboard/dashboard_module.dart';
 
 /// Main application module using Flutter Modular
 /// Following Modular Architecture and Dependency Inversion Principle
@@ -39,5 +40,6 @@ class AppModule extends Module {
 
     // Private routes
     r.module('/user', module: UserModule(), guards: [AuthGuard()]);
+    r.module('/dashboard', module: DashboardModule(), guards: [AuthGuard()]);
   }
 }

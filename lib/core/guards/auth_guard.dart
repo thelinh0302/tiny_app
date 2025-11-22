@@ -7,8 +7,15 @@ class AuthGuard extends RouteGuard {
   AuthGuard() : super(redirectTo: '/auth/login');
 
   @override
-  FutureOr<bool> canActivate(String path, ParallelRoute route) {
+  FutureOr<bool> canActivate(String path, ParallelRoute route) async {
     final auth = Modular.get<AuthService>();
-    return auth.isLoggedIn;
+
+    // Fast-path: if we already know we're logged in in-memory, allow.
+    if (auth.isLoggedIn) return true;
+
+    // On hot restart / hard reload, in-memory state is lost. Try to
+    // restore session from persisted tokens before deciding.
+    final restored = await auth.restoreSessionFromStorage();
+    return restored;
   }
 }
