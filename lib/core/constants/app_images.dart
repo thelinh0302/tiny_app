@@ -23,6 +23,10 @@ class AppImages {
   static const String navSetting = '$_base/setting_icon.svg';
   static const String navProfile = '$_base/profile_icon.svg';
 
+  // Dashboard icons
+  static const String income = '$_base/income.svg';
+  static const String expense = '$_base/expense.svg';
+
   // Example placeholders (add your PNGs/SVGs here)
   // static const String logoPng = '$_base/logo.png';
   // static const String iconSvg = '$_base/icon.svg';
