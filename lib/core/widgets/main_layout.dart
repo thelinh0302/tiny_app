@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 class MainLayout extends StatelessWidget {
   final Widget? topChild;
+  final PreferredSizeWidget? appBar;
   final Widget child;
   final double topHeightRatio;
   final Color topColor;
@@ -12,6 +13,7 @@ class MainLayout extends StatelessWidget {
   const MainLayout({
     super.key,
     this.topChild,
+    this.appBar,
     required this.child,
     this.topHeightRatio = 0.4,
     this.topColor = AppColors.mainGreen,
@@ -29,6 +31,7 @@ class MainLayout extends StatelessWidget {
     final double topHeight = size.height * topHeightRatio;
 
     return Scaffold(
+      appBar: appBar,
       backgroundColor: topColor,
       body: Stack(
         children: [
@@ -57,7 +60,7 @@ class MainLayout extends StatelessWidget {
                 borderRadius: borderRadius,
               ),
               child: Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(12.0),
                 child: SafeArea(
                   top: false,
                   child:
@@ -67,14 +70,10 @@ class MainLayout extends StatelessWidget {
                               return SingleChildScrollView(
                                 padding: EdgeInsets.only(
                                   bottom:
-                                      MediaQuery.of(context).viewInsets.bottom,
+                                      MediaQuery.of(context).viewInsets.bottom +
+                                      20,
                                 ),
-                                child: ConstrainedBox(
-                                  constraints: BoxConstraints(
-                                    minHeight: constraints.maxHeight,
-                                  ),
-                                  child: child,
-                                ),
+                                child: child,
                               );
                             },
                           )

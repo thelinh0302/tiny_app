@@ -24,8 +24,13 @@ class AppBottomNavigation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Dynamically size bottom navigation to respect system insets and
+    // avoid a hard-coded fixed height.
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
+    final double navHeight = kBottomNavigationBarHeight + bottomPadding - 15;
+
     return SizedBox(
-      height: 166, // increased height for taller bottom navigation
+      height: navHeight,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -120,7 +125,6 @@ class AppBottomNavigation extends StatelessWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: AppColors.primaryGradient,
-                    border: Border.all(color: AppColors.white, width: 3),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.28),
@@ -172,8 +176,8 @@ class _NavItem extends StatelessWidget {
           scale: isActive ? 1.1 : 0.95,
           child: AppImages.image(
             iconAsset,
-            width: 28,
-            height: 28,
+            width: 24,
+            height: 24,
             color: AppColors.white.withValues(alpha: isActive ? 1.0 : 0.7),
           ),
         ),
