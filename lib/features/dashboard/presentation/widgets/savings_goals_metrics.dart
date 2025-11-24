@@ -39,8 +39,8 @@ class SavingsGoalsMetrics extends StatelessWidget {
           children: [
             AppImages.image(
               AppImages.salary,
-              width: 25,
-              height: 25,
+              width: 35,
+              height: 35,
               color: AppColors.white,
             ),
             AppSpacing.horizontalSpaceSmall,
@@ -75,8 +75,8 @@ class SavingsGoalsMetrics extends StatelessWidget {
           children: [
             AppImages.image(
               AppImages.food,
-              width: 25,
-              height: 25,
+              width: 35,
+              height: 35,
               color: AppColors.white,
             ),
             AppSpacing.horizontalSpaceSmall,

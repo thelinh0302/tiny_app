@@ -48,7 +48,6 @@ class AuthService {
     try {
       final accessToken = await tokenStorage.getAccessToken();
       final expireAtStr = await tokenStorage.getExpireAt();
-
       if (accessToken == null || accessToken.isEmpty) {
         _isLoggedIn.value = false;
         return false;

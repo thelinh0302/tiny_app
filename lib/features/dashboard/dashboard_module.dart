@@ -1,6 +1,6 @@
 import 'package:flutter_modular/flutter_modular.dart';
 
-import 'presentation/pages/home_page.dart';
+import 'package:finly_app/features/main/presentation/pages/main_shell_page.dart';
 
 /// Dashboard feature module.
 ///
@@ -8,7 +8,7 @@ import 'presentation/pages/home_page.dart';
 class DashboardModule extends Module {
   @override
   void routes(RouteManager r) {
-    // /dashboard -> dashboard home page
-    r.child('/', child: (context) => const HomePage());
+    // /dashboard -> main shell with bottom navigation
+    r.child('/', child: (context) => const MainShellPage());
   }
 }
