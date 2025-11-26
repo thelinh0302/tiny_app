@@ -148,8 +148,19 @@
       }
     }
   },
+  "category": {
+    "name": {
+      "label": "Category name",
+      "hint": "Enter category name"
+    },
+    "icon": {
+      "label": "Category icon"
+    }
+  },
   "Categories": "Categories",
   "Coming soon...": "Coming soon...",
   "Hi, Welcome Back": "Hi, Welcome Back",
-  "add": "Add"
+  "add": "Add",
+  "save": "Save",
+  "add_category": "Add category"
 }

@@ -148,8 +148,19 @@
       }
     }
   },
+  "category": {
+    "name": {
+      "label": "Tên danh mục",
+      "hint": "Nhập tên danh mục"
+    },
+    "icon": {
+      "label": "Biểu tượng danh mục"
+    }
+  },
   "Categories": "Danh mục",
   "Coming soon...": "Sắp ra mắt...",
   "Hi, Welcome Back": "Xin chào, chào mừng trở lại",
-  "add": "Thêm"
+  "add": "Thêm",
+  "save": "Lưu",
+  "add_category": "Thêm danh mục"
 }
