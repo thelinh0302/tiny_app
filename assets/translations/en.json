@@ -147,5 +147,9 @@
         "invalidInputs": "Please enter a valid code and matching passwords"
       }
     }
-  }
+  },
+  "Categories": "Categories",
+  "Coming soon...": "Coming soon...",
+  "Hi, Welcome Back": "Hi, Welcome Back",
+  "add": "Add"
 }

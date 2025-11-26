@@ -33,6 +33,9 @@ class AppImages {
   static const String salary = '$_base/salary_icon.svg';
   static const String food = '$_base/food_icon.svg';
 
+  // UI icons
+  static const String notification = '$_base/noti_icon.svg';
+
   // Example placeholders (add your PNGs/SVGs here)
   // static const String logoPng = '$_base/logo.png';
   // static const String iconSvg = '$_base/icon.svg';
