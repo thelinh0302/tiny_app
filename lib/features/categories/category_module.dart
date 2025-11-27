@@ -7,6 +7,8 @@ import 'package:finly_app/features/categories/domain/repositories/category_icon_
 import 'package:finly_app/features/categories/domain/usecases/get_category_icons.dart';
 import 'package:finly_app/features/categories/presentation/bloc/category_icons_bloc.dart';
 import 'package:finly_app/features/categories/presentation/pages/add_category_page.dart';
+import 'package:finly_app/features/categories/presentation/pages/category_transactions_page.dart';
+import 'package:finly_app/features/categories/presentation/widgets/category_card.dart';
 import 'package:finly_app/features/main/presentation/pages/main_shell_page.dart';
 
 /// Category feature module.
@@ -50,5 +52,14 @@ class CategoryModule extends Module {
 
     // /category/add -> add category screen
     r.child('/add', child: (context) => const AddCategoryPage());
+
+    // /category/transactions -> category transaction list
+    r.child(
+      '/transactions',
+      child: (context) {
+        final category = r.args.data as CategoryData;
+        return CategoryTransactionsPage(category: category);
+      },
+    );
   }
 }

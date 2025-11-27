@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 
 import 'package:finly_app/core/constants/app_spacing.dart';
 import 'package:finly_app/core/widgets/main_layout.dart';
@@ -23,7 +24,17 @@ class CategoriesPage extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.horizontalMedium),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [AppSpacing.verticalSpaceMedium, const CategoriesGrid()],
+          children: [
+            AppSpacing.verticalSpaceMedium,
+            CategoriesGrid(
+              onCategoryTap: (category) {
+                Modular.to.pushNamed(
+                  '/category/transactions',
+                  arguments: category,
+                );
+              },
+            ),
+          ],
         ),
       ),
     );
