@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 
 import 'package:finly_app/core/constants/app_spacing.dart';
 import 'package:finly_app/core/widgets/dashboard_totals_overview.dart';
@@ -82,10 +83,9 @@ class CategoryTransactionsPage extends StatelessWidget {
         child: CategoryTransactionsList(
           transactions: txs,
           onAddExpense: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Add expense flow not implemented yet'),
-              ),
+            Modular.to.pushNamed(
+              '/dashboard/category/add-expense',
+              arguments: category,
             );
           },
         ),

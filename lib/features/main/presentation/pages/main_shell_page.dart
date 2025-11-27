@@ -62,7 +62,7 @@ class _MainShellPageState extends State<MainShellPage> {
         Modular.to.navigate('/dashboard/transactions');
         break;
       case 3:
-        Modular.to.navigate('/dashboard/category');
+        Modular.to.navigate('/dashboard/category/');
         break;
       case 4:
         Modular.to.navigate('/dashboard/profile');
