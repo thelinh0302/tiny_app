@@ -29,7 +29,7 @@ class CategoriesPage extends StatelessWidget {
             CategoriesGrid(
               onCategoryTap: (category) {
                 Modular.to.pushNamed(
-                  '/category/transactions',
+                  '/dashboard/category/transactions',
                   arguments: category,
                 );
               },

@@ -12,7 +12,7 @@ class AddCategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Modular.to.pushNamed('/category/add'),
+      onTap: () => Modular.to.pushNamed('/dashboard/category/add'),
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.white,

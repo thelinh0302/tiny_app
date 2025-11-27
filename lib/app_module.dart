@@ -42,6 +42,5 @@ class AppModule extends Module {
     // Private routes
     r.module('/user', module: UserModule(), guards: [AuthGuard()]);
     r.module('/dashboard', module: DashboardModule(), guards: [AuthGuard()]);
-    r.module('/category', module: CategoryModule(), guards: [AuthGuard()]);
   }
 }

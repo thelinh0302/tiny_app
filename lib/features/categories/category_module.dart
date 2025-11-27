@@ -9,7 +9,7 @@ import 'package:finly_app/features/categories/presentation/bloc/category_icons_b
 import 'package:finly_app/features/categories/presentation/pages/add_category_page.dart';
 import 'package:finly_app/features/categories/presentation/pages/category_transactions_page.dart';
 import 'package:finly_app/features/categories/presentation/widgets/category_card.dart';
-import 'package:finly_app/features/main/presentation/pages/main_shell_page.dart';
+import 'package:finly_app/features/categories/presentation/pages/categories_page.dart';
 
 /// Category feature module.
 ///
@@ -47,13 +47,13 @@ class CategoryModule extends Module {
 
   @override
   void routes(RouteManager r) {
-    // /category -> main shell with bottom navigation
-    r.child('/', child: (context) => const MainShellPage());
+    // /dashboard/category -> categories tab root (under MainShell RouterOutlet)
+    r.child('/', child: (context) => const CategoriesPage());
 
-    // /category/add -> add category screen
+    // /dashboard/category/add -> add category screen
     r.child('/add', child: (context) => const AddCategoryPage());
 
-    // /category/transactions -> category transaction list
+    // /dashboard/category/transactions -> category transaction list
     r.child(
       '/transactions',
       child: (context) {
