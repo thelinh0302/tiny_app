@@ -5,7 +5,7 @@ import 'package:finly_app/core/constants/app_images.dart';
 import 'package:finly_app/core/theme/app_colors.dart';
 import 'package:finly_app/core/widgets/filter_segmented_control.dart';
 import 'package:finly_app/features/dashboard/presentation/widgets/savings_goals_card.dart';
-import 'package:finly_app/features/dashboard/presentation/widgets/transaction_list.dart';
+import 'package:finly_app/core/widgets/transaction_list.dart';
 
 /// Center section of the home dashboard.
 /// Shows the custom "Savings on Goals" widget card and time filter.
