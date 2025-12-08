@@ -23,4 +23,10 @@ abstract class CategoryRepository {
     required int page,
     required int pageSize,
   });
+
+  Future<Either<Failure, Category>> createCategory({
+    required String name,
+    required String type,
+    required String icon,
+  });
 }

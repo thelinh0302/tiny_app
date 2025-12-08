@@ -17,6 +17,8 @@ import 'package:finly_app/features/categories/domain/repositories/category_repos
 import 'package:finly_app/features/categories/domain/usecases/get_categories.dart';
 import 'package:finly_app/features/categories/presentation/bloc/category_list_bloc.dart';
 import 'package:finly_app/core/network/dio_client.dart';
+import 'package:finly_app/features/categories/domain/usecases/create_category.dart';
+import 'package:finly_app/features/categories/presentation/bloc/add_category_bloc.dart';
 
 /// Category feature module.
 ///
@@ -63,6 +65,14 @@ class CategoryModule extends Module {
     );
     i.add<CategoryListBloc>(
       () => CategoryListBloc(getCategories: i.get<GetCategories>()),
+    );
+
+    // Add-category use case + bloc (formz)
+    i.addLazySingleton<CreateCategory>(
+      () => CreateCategory(i.get<CategoryRepository>()),
+    );
+    i.add<AddCategoryBloc>(
+      () => AddCategoryBloc(createCategory: i.get<CreateCategory>()),
     );
   }
 

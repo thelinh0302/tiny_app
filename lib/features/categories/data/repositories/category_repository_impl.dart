@@ -40,4 +40,24 @@ class CategoryRepositoryImpl implements CategoryRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, Category>> createCategory({
+    required String name,
+    required String type,
+    required String icon,
+  }) async {
+    try {
+      final model = await remote.createCategory(
+        name: name,
+        type: type,
+        icon: icon,
+      );
+      return Right(model);
+    } on DioException catch (e) {
+      return Left(ServerFailure(e.message ?? 'Network error'));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
 }

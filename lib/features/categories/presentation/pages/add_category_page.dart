@@ -11,6 +11,8 @@ import 'package:finly_app/core/widgets/main_app_bar.dart';
 import 'package:finly_app/core/widgets/main_layout.dart';
 import 'package:finly_app/features/categories/presentation/bloc/category_icons_bloc.dart';
 import 'package:finly_app/features/categories/presentation/widgets/category_icons_grid.dart';
+import 'package:finly_app/core/widgets/custom_dropdown_field.dart';
+import 'package:finly_app/features/categories/presentation/bloc/add_category_bloc.dart';
 
 class AddCategoryPage extends StatefulWidget {
   const AddCategoryPage({super.key});
@@ -22,6 +24,7 @@ class AddCategoryPage extends StatefulWidget {
 class _AddCategoryPageState extends State<AddCategoryPage> {
   final TextEditingController _nameController = TextEditingController();
   String? _selectedThumbnail;
+  String? _selectedType;
 
   @override
   void dispose() {
@@ -31,12 +34,18 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<CategoryIconsBloc>(
-      // Get BLoC from Modular DI and immediately trigger load
-      create:
-          (_) =>
-              Modular.get<CategoryIconsBloc>()
-                ..add(const CategoryIconsRequested()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<CategoryIconsBloc>(
+          create:
+              (_) =>
+                  Modular.get<CategoryIconsBloc>()
+                    ..add(const CategoryIconsRequested()),
+        ),
+        BlocProvider<AddCategoryBloc>(
+          create: (_) => Modular.get<AddCategoryBloc>(),
+        ),
+      ],
       child: Builder(
         builder: (context) {
           return MainLayout(
@@ -50,10 +59,71 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AppSpacing.verticalSpaceMedium,
-                  CustomTextField(
-                    controller: _nameController,
-                    labelText: 'category.name.label'.tr(),
-                    hintText: 'category.name.hint'.tr(),
+                  BlocListener<AddCategoryBloc, AddCategoryState>(
+                    listenWhen: (p, c) => p.status != c.status,
+                    listener: (context, state) {
+                      if (state.status == AddCategoryStatus.submissionSuccess) {
+                        Navigator.of(context).pop();
+                      } else if (state.status ==
+                              AddCategoryStatus.submissionFailure &&
+                          state.errorMessage != null) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(state.errorMessage!)),
+                        );
+                      }
+                    },
+                    child: const SizedBox.shrink(),
+                  ),
+                  BlocBuilder<AddCategoryBloc, AddCategoryState>(
+                    buildWhen: (p, c) => p.name != c.name,
+                    builder: (context, state) {
+                      String? error;
+                      if (state.name.displayError != null) {
+                        error = 'category.validation.nameRequired'.tr();
+                      }
+                      return CustomTextField(
+                        controller: _nameController,
+                        labelText: 'category.name.label'.tr(),
+                        hintText: 'category.name.hint'.tr(),
+                        errorText: error,
+                        onChanged:
+                            (v) => BlocProvider.of<AddCategoryBloc>(
+                              context,
+                            ).add(AddCategoryNameChanged(v)),
+                      );
+                    },
+                  ),
+                  AppSpacing.verticalSpaceLarge,
+                  BlocBuilder<AddCategoryBloc, AddCategoryState>(
+                    buildWhen: (p, c) => p.type != c.type,
+                    builder: (context, state) {
+                      String? error;
+                      if (state.type.displayError != null) {
+                        error = 'category.validation.typeRequired'.tr();
+                      }
+                      return CustomDropdownField<String>(
+                        labelText: 'category.type.label'.tr(),
+                        value: _selectedType,
+                        placeholderText: 'category.type.placeholder'.tr(),
+                        items: [
+                          DropdownMenuItem(
+                            value: 'income',
+                            child: Text('category.type.income'.tr()),
+                          ),
+                          DropdownMenuItem(
+                            value: 'expense',
+                            child: Text('category.type.expense'.tr()),
+                          ),
+                        ],
+                        errorText: error,
+                        onChanged: (v) {
+                          setState(() => _selectedType = v);
+                          BlocProvider.of<AddCategoryBloc>(
+                            context,
+                          ).add(AddCategoryTypeChanged(v));
+                        },
+                      );
+                    },
                   ),
                   AppSpacing.verticalSpaceLarge,
                   Text(
@@ -63,40 +133,63 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                     ),
                   ),
                   AppSpacing.verticalSpaceSmall,
-                  CategoryIconsGrid(
-                    selectedThumbnail: _selectedThumbnail,
-                    onThumbnailSelected: (thumbnail) {
-                      setState(() {
-                        _selectedThumbnail = thumbnail;
-                      });
+                  BlocBuilder<AddCategoryBloc, AddCategoryState>(
+                    buildWhen: (p, c) => p.icon != c.icon,
+                    builder: (context, state) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CategoryIconsGrid(
+                            selectedThumbnail: _selectedThumbnail,
+                            onThumbnailSelected: (thumbnail) {
+                              setState(() {
+                                _selectedThumbnail = thumbnail;
+                              });
+                              BlocProvider.of<AddCategoryBloc>(
+                                context,
+                              ).add(AddCategoryIconChanged(thumbnail));
+                            },
+                          ),
+                          if (state.icon.displayError != null)
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                top: 6.0,
+                                left: 4.0,
+                              ),
+                              child: Text(
+                                'category.validation.iconRequired'.tr(),
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.copyWith(
+                                  color: AppColors.errorColor,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
                     },
                   ),
                   AppSpacing.verticalSpaceMedium,
                   Center(
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: PrimaryButton(
-                        text: 'save'.tr(),
-                        onPressed: () {
-                          final name = _nameController.text.trim();
-
-                          if (name.isEmpty || _selectedThumbnail == null) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Please enter name & select icon',
-                                ),
-                              ),
-                            );
-                            return;
-                          }
-
-                          Navigator.of(context).pop(<String, dynamic>{
-                            'name': name,
-                            'thumbnail': _selectedThumbnail,
-                          });
-                        },
-                      ),
+                    child: BlocBuilder<AddCategoryBloc, AddCategoryState>(
+                      builder: (context, state) {
+                        final isLoading =
+                            state.status ==
+                            AddCategoryStatus.submissionInProgress;
+                        return SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          child: PrimaryButton(
+                            text: 'save'.tr(),
+                            isLoading: isLoading,
+                            onPressed: () {
+                              BlocProvider.of<AddCategoryBloc>(
+                                context,
+                              ).add(const AddCategorySubmitted());
+                            },
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ],

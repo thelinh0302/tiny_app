@@ -153,8 +153,19 @@
       "label": "Category name",
       "hint": "Enter category name"
     },
+    "type": {
+      "label": "Type",
+      "placeholder": "Select type",
+      "income": "Income",
+      "expense": "Expense"
+    },
     "icon": {
       "label": "Category icon"
+    },
+    "validation": {
+      "nameRequired": "Please enter a category name",
+      "typeRequired": "Please select a type",
+      "iconRequired": "Please select an icon"
     }
   },
   "Categories": "Categories",

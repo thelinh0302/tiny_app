@@ -7,12 +7,18 @@ import 'package:finly_app/core/theme/app_colors.dart';
 
 /// Reusable "Add category" card used as the last tile in the grid.
 class AddCategoryCard extends StatelessWidget {
-  const AddCategoryCard({super.key});
+  final VoidCallback? onAdded;
+  const AddCategoryCard({super.key, this.onAdded});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => Modular.to.pushNamed('/dashboard/category/add'),
+      onTap: () async {
+        final result = await Modular.to.pushNamed('/dashboard/category/add');
+        if (result != null) {
+          onAdded?.call();
+        }
+      },
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.white,

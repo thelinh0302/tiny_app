@@ -8,11 +8,13 @@ import 'package:finly_app/features/categories/presentation/widgets/category_card
 class CategoriesGrid extends StatelessWidget {
   final List<CategoryData> categories;
   final ValueChanged<CategoryData>? onCategoryTap;
+  final VoidCallback? onAddCompleted;
 
   const CategoriesGrid({
     super.key,
     required this.categories,
     this.onCategoryTap,
+    this.onAddCompleted,
   });
 
   @override
@@ -30,7 +32,7 @@ class CategoriesGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         if (index == categories.length) {
           // Last tile is always the "add" card.
-          return const AddCategoryCard();
+          return AddCategoryCard(onAdded: onAddCompleted);
         }
         final category = categories[index];
         return CategoryCard(

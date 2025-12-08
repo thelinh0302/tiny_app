@@ -72,6 +72,11 @@ class CategoriesPage extends StatelessWidget {
                           arguments: category,
                         );
                       },
+                      onAddCompleted: () {
+                        BlocProvider.of<CategoryListBloc>(context).add(
+                          const CategoryListRequested(page: 1, pageSize: 20),
+                        );
+                      },
                     );
                   }
                   return const SizedBox.shrink();

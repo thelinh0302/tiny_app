@@ -13,6 +13,12 @@ abstract class CategoryRemoteDataSource {
     )
   >
   getCategories({required int page, required int pageSize});
+
+  Future<CategoryModel> createCategory({
+    required String name,
+    required String type,
+    required String icon,
+  });
 }
 
 class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
@@ -46,6 +52,24 @@ class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
       final curPageSize = (data['pageSize'] as num).toInt();
       final totalPages = (data['totalPages'] as num).toInt();
       return (items, total, curPage, curPageSize, totalPages);
+    } on DioException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  @override
+  Future<CategoryModel> createCategory({
+    required String name,
+    required String type,
+    required String icon,
+  }) async {
+    try {
+      final Response res = await client.post(
+        '/categories',
+        data: {'name': name, 'type': type, 'icon': icon},
+      );
+      final data = res.data as Map<String, dynamic>;
+      return CategoryModel.fromJson(data);
     } on DioException catch (e) {
       throw Exception(e.message);
     }
