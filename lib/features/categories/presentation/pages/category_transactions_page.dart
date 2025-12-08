@@ -85,7 +85,7 @@ class CategoryTransactionsPage extends StatelessWidget {
           onAddExpense: () {
             Modular.to.pushNamed(
               '/dashboard/category/add-expense',
-              arguments: category,
+              arguments: category.id,
             );
           },
         ),

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_modular/flutter_modular.dart';
 
 import 'package:finly_app/core/constants/app_spacing.dart';
-import 'package:finly_app/core/theme/app_colors.dart';
 import 'package:finly_app/core/widgets/custom_button.dart';
 import 'package:finly_app/core/widgets/custom_text_field.dart';
 import 'package:finly_app/core/widgets/image_picker_field.dart';
@@ -10,9 +8,12 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 import 'package:finly_app/core/widgets/main_app_bar.dart';
 import 'package:finly_app/core/widgets/main_layout.dart';
-import 'package:finly_app/features/categories/presentation/widgets/category_card.dart';
-import 'package:finly_app/features/categories/presentation/widgets/category_dropdown_field.dart';
-import 'package:finly_app/features/categories/presentation/data/default_categories.dart';
+import 'package:finly_app/core/widgets/custom_dropdown_field.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:finly_app/features/categories/presentation/bloc/category_list_bloc.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
 
 /// Add Expense screen with:
 /// - date field
@@ -24,7 +25,7 @@ import 'package:finly_app/features/categories/presentation/data/default_categori
 ///
 /// On Save, the page pops with a Map payload. Caller/Bloc can send to backend.
 class AddExpensePage extends StatefulWidget {
-  final CategoryData? initialCategory;
+  final String? initialCategory;
 
   const AddExpensePage({super.key, this.initialCategory});
 
@@ -41,12 +42,52 @@ class _AddExpensePageState extends State<AddExpensePage> {
   Uint8List? _imageBytes;
 
   DateTime? _selectedDate;
-  CategoryData? _selectedCategory;
+  String? _selectedCategory;
 
   String? _amountError;
   String? _nameError;
   String? _categoryError;
   String? _dateError;
+
+  void _onAmountChanged(String value) {
+    final localeCode = context.locale.languageCode.toLowerCase();
+    final isVi = localeCode.startsWith('vi');
+    final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitsOnly.isEmpty) {
+      _amountCtrl.value = const TextEditingValue(text: '');
+      setState(() {});
+      return;
+    }
+    if (isVi) {
+      final int amount = int.parse(digitsOnly);
+      final formatter = NumberFormat.currency(
+        locale: 'vi_VN',
+        symbol: '₫',
+        decimalDigits: 0,
+      );
+      final formatted = formatter.format(amount);
+      _amountCtrl.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    } else {
+      final int cents = int.parse(digitsOnly);
+      final double amount = cents / 100;
+      final formatter = NumberFormat.currency(
+        locale: 'en_US',
+        symbol: r'$',
+        decimalDigits: 2,
+      );
+      final formatted = formatter.format(amount);
+      _amountCtrl.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(offset: formatted.length),
+      );
+    }
+    setState(() {
+      _amountError = null;
+    });
+  }
 
   @override
   void initState() {
@@ -99,8 +140,21 @@ class _AddExpensePageState extends State<AddExpensePage> {
     if (_nameCtrl.text.trim().isEmpty) {
       _nameError = 'Please enter a name';
     }
-    final String amountText = _amountCtrl.text.trim();
-    final double? amount = double.tryParse(amountText);
+    final String rawAmount = _amountCtrl.text.trim();
+    final String localeCode = context.locale.languageCode.toLowerCase();
+    final bool isVi = localeCode.startsWith('vi');
+    final String digitsOnly = rawAmount.replaceAll(RegExp(r'[^0-9]'), '');
+    double? amount;
+    if (digitsOnly.isEmpty) {
+      amount = null;
+    } else if (isVi) {
+      // VND formatted without decimals -> digitsOnly already in units
+      amount = double.tryParse(digitsOnly);
+    } else {
+      // USD formatted as dollars with 2 decimals -> digitsOnly are cents
+      final double? cents = double.tryParse(digitsOnly);
+      amount = cents != null ? cents / 100.0 : null;
+    }
     if (amount == null || amount <= 0) {
       _amountError = 'Please enter a valid amount';
     }
@@ -112,110 +166,136 @@ class _AddExpensePageState extends State<AddExpensePage> {
       setState(() {});
       return;
     }
-
-    final payload = <String, dynamic>{
-      'date': _selectedDate!.toIso8601String(),
-      'category': _selectedCategory!.title,
-      'categoryIcon': _selectedCategory!.iconAsset,
-      'amount': amount,
-      'name': _nameCtrl.text.trim(),
-      'description': _descCtrl.text.trim(),
-      // Image selected locally; caller should handle upload.
-      'imagePath': _imageFile?.path,
-      'imageBytes': _imageBytes,
-    };
-
-    Navigator.of(context).pop(payload);
   }
 
   @override
   Widget build(BuildContext context) {
-    return MainLayout(
-      appBar: const MainAppBar(titleKey: 'Add Expense'),
-      enableContentScroll: true,
-      topHeightRatio: 0.2,
-      topChild: null,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.horizontalMedium),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AppSpacing.verticalSpaceMedium,
+    return BlocProvider<CategoryListBloc>(
+      create:
+          (_) =>
+              Modular.get<CategoryListBloc>()
+                ..add(const CategoryListRequested(page: 1, pageSize: 20)),
+      child: MainLayout(
+        appBar: const MainAppBar(titleKey: 'Add Expense'),
+        enableContentScroll: true,
+        topHeightRatio: 0.2,
+        topChild: null,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.horizontalMedium),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AppSpacing.verticalSpaceMedium,
 
-            // Date field
-            CustomTextField(
-              controller: _dateCtrl,
-              labelText: 'Date',
-              hintText: 'YYYY-MM-DD',
-              readOnly: true,
-              onTap: _pickDate,
-              errorText: _dateError,
-            ),
-            AppSpacing.verticalSpaceMedium,
-
-            // Category dropdown
-            CategoryDropdownField(
-              value: _selectedCategory,
-              categories: defaultCategories,
-              errorText: _categoryError,
-              onChanged:
-                  (val) => setState(() {
-                    _selectedCategory = val;
-                    _categoryError = null;
-                  }),
-            ),
-            AppSpacing.verticalSpaceMedium,
-
-            // Amount
-            CustomTextField(
-              controller: _amountCtrl,
-              labelText: 'Amount',
-              hintText: '0.00',
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
+              // Date field
+              CustomTextField(
+                controller: _dateCtrl,
+                labelText: 'Date',
+                hintText: 'MM-DD-YYYY',
+                readOnly: true,
+                onTap: _pickDate,
+                errorText: _dateError,
               ),
-              errorText: _amountError,
-            ),
-            AppSpacing.verticalSpaceMedium,
+              AppSpacing.verticalSpaceMedium,
 
-            // Name
-            CustomTextField(
-              controller: _nameCtrl,
-              labelText: 'Name',
-              hintText: 'e.g., Lunch',
-              errorText: _nameError,
-            ),
-            AppSpacing.verticalSpaceMedium,
+              // Category dropdown (driven by CategoryListBloc)
+              BlocBuilder<CategoryListBloc, CategoryListState>(
+                builder: (context, state) {
+                  final List<DropdownMenuItem<String>> items =
+                      <DropdownMenuItem<String>>[];
+                  if (state is CategoryListLoadSuccess) {
+                    final Set<String> seen = <String>{};
+                    for (final e in state.items) {
+                      final String id = e.id;
+                      if (seen.add(id)) {
+                        items.add(
+                          DropdownMenuItem<String>(
+                            value: id,
+                            child: Text(e.name),
+                          ),
+                        );
+                      }
+                    }
+                  }
 
-            // Description
-            CustomTextField(
-              controller: _descCtrl,
-              labelText: 'Description',
-              hintText: 'Optional details',
-              maxLines: 3,
-            ),
-            AppSpacing.verticalSpaceMedium,
+                  final bool hasSelected =
+                      items.where((m) => m.value == _selectedCategory).length ==
+                      1;
+                  final String? selectedId =
+                      hasSelected ? _selectedCategory : null;
 
-            // Receipt Image (selected from device)
-            ImagePickerField(
-              labelText: 'Receipt Image',
-              onChanged: (file, bytes) {
-                setState(() {
-                  _imageFile = file;
-                  _imageBytes = bytes;
-                });
-              },
-            ),
-
-            AppSpacing.verticalSpaceLarge,
-            Center(
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 0.5,
-                child: PrimaryButton(text: 'Save', onPressed: _save),
+                  return CustomDropdownField<String>(
+                    labelText: 'Category',
+                    value: selectedId,
+                    items: items,
+                    errorText: _categoryError,
+                    placeholderText: 'Select category',
+                    enabled: state is! CategoryListLoadInProgress,
+                    onChanged:
+                        (String? val) => setState(() {
+                          _selectedCategory = val;
+                          _categoryError = null;
+                        }),
+                  );
+                },
               ),
-            ),
-            AppSpacing.verticalSpaceLarge,
-          ],
+              AppSpacing.verticalSpaceMedium,
+
+              // Amount
+              CustomTextField(
+                controller: _amountCtrl,
+                labelText: 'Amount',
+                hintText:
+                    context.locale.languageCode.toLowerCase().startsWith('vi')
+                        ? '0 ₫'
+                        : '\$0.00',
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                onChanged: _onAmountChanged,
+                errorText: _amountError,
+              ),
+              AppSpacing.verticalSpaceMedium,
+
+              // Name
+              CustomTextField(
+                controller: _nameCtrl,
+                labelText: 'Name',
+                hintText: 'e.g., Lunch',
+                errorText: _nameError,
+              ),
+              AppSpacing.verticalSpaceMedium,
+
+              // Description
+              CustomTextField(
+                controller: _descCtrl,
+                labelText: 'Description',
+                hintText: 'Optional details',
+                maxLines: 3,
+              ),
+              AppSpacing.verticalSpaceMedium,
+
+              // Receipt Image (selected from device)
+              ImagePickerField(
+                labelText: 'Receipt Image',
+                onChanged: (file, bytes) {
+                  setState(() {
+                    _imageFile = file;
+                    _imageBytes = bytes;
+                  });
+                },
+              ),
+
+              AppSpacing.verticalSpaceLarge,
+              Center(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.5,
+                  child: PrimaryButton(text: 'Save', onPressed: _save),
+                ),
+              ),
+              AppSpacing.verticalSpaceLarge,
+            ],
+          ),
         ),
       ),
     );

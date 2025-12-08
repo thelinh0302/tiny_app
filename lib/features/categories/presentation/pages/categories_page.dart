@@ -58,6 +58,7 @@ class CategoriesPage extends StatelessWidget {
                         state.items
                             .map(
                               (c) => CategoryData(
+                                id: c.id,
                                 title: c.name,
                                 iconAsset: c.iconUrl ?? AppImages.food,
                                 backgroundColor: AppColors.mainGreen,

@@ -7,6 +7,7 @@ import 'package:finly_app/features/categories/presentation/widgets/helpers/icon_
 
 /// Simple model describing a category item.
 class CategoryData {
+  final String id;
   final String title;
   final String iconAsset;
   final Color backgroundColor;
@@ -14,6 +15,7 @@ class CategoryData {
   const CategoryData({
     required this.title,
     required this.iconAsset,
+    required this.id,
     required this.backgroundColor,
   });
 }

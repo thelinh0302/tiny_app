@@ -88,7 +88,7 @@ class CategoryModule extends Module {
     r.child(
       '/add-expense',
       child: (context) {
-        final initial = r.args.data as CategoryData?;
+        final initial = r.args.data;
         return AddExpensePage(initialCategory: initial);
       },
     );
