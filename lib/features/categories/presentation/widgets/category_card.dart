@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:finly_app/core/constants/app_images.dart';
 import 'package:finly_app/core/constants/app_spacing.dart';
 import 'package:finly_app/core/theme/app_colors.dart';
+import 'package:finly_app/features/categories/presentation/widgets/helpers/icon_widget.dart';
 
 /// Simple model describing a category item.
 class CategoryData {
@@ -53,7 +54,7 @@ class CategoryCard extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Center(
-                  child: AppImages.image(
+                  child: buildCategoryIcon(
                     category.iconAsset,
                     width: 54,
                     height: 54,

@@ -12,6 +12,7 @@ import 'package:finly_app/core/widgets/main_app_bar.dart';
 import 'package:finly_app/core/widgets/main_layout.dart';
 import 'package:finly_app/features/categories/presentation/widgets/category_card.dart';
 import 'package:finly_app/features/categories/presentation/widgets/category_dropdown_field.dart';
+import 'package:finly_app/features/categories/presentation/data/default_categories.dart';
 
 /// Add Expense screen with:
 /// - date field
@@ -155,6 +156,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
             // Category dropdown
             CategoryDropdownField(
               value: _selectedCategory,
+              categories: defaultCategories,
               errorText: _categoryError,
               onChanged:
                   (val) => setState(() {

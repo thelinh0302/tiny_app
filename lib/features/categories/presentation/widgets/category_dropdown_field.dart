@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:finly_app/core/constants/app_spacing.dart';
 import 'package:finly_app/core/theme/app_colors.dart';
 import 'package:finly_app/features/categories/presentation/widgets/category_card.dart';
-import 'package:finly_app/features/categories/presentation/widgets/categories_grid.dart'
-    show kCategories;
 
 class CategoryDropdownField extends StatelessWidget {
   final CategoryData? value;
@@ -17,9 +15,9 @@ class CategoryDropdownField extends StatelessWidget {
     super.key,
     required this.value,
     required this.onChanged,
+    required this.categories,
     this.errorText,
     this.labelText = 'Category',
-    this.categories = kCategories,
   });
 
   @override

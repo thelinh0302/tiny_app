@@ -11,6 +11,12 @@ import 'package:finly_app/features/categories/presentation/pages/add_expense_pag
 import 'package:finly_app/features/categories/presentation/pages/category_transactions_page.dart';
 import 'package:finly_app/features/categories/presentation/widgets/category_card.dart';
 import 'package:finly_app/features/categories/presentation/pages/categories_page.dart';
+import 'package:finly_app/features/categories/data/datasources/category_remote_data_source.dart';
+import 'package:finly_app/features/categories/data/repositories/category_repository_impl.dart';
+import 'package:finly_app/features/categories/domain/repositories/category_repository.dart';
+import 'package:finly_app/features/categories/domain/usecases/get_categories.dart';
+import 'package:finly_app/features/categories/presentation/bloc/category_list_bloc.dart';
+import 'package:finly_app/core/network/dio_client.dart';
 
 /// Category feature module.
 ///
@@ -28,7 +34,7 @@ class CategoryModule extends Module {
       ),
     );
 
-    // Repository implementation
+    // Repository implementation for icons
     i.addLazySingleton<CategoryIconRepository>(
       () => CategoryIconRepositoryImpl(
         remoteDataSource: i.get<CategoryIconRemoteDataSource>(),
@@ -43,6 +49,20 @@ class CategoryModule extends Module {
     // BLoC for loading category icons, depends on use case
     i.add<CategoryIconsBloc>(
       () => CategoryIconsBloc(getCategoryIcons: i.get<GetCategoryIcons>()),
+    );
+
+    // Categories list: remote data source -> repository -> use case -> bloc
+    i.addLazySingleton<CategoryRemoteDataSource>(
+      () => CategoryRemoteDataSourceImpl(client: Modular.get<DioClient>()),
+    );
+    i.addLazySingleton<CategoryRepository>(
+      () => CategoryRepositoryImpl(remote: i.get<CategoryRemoteDataSource>()),
+    );
+    i.addLazySingleton<GetCategories>(
+      () => GetCategories(i.get<CategoryRepository>()),
+    );
+    i.add<CategoryListBloc>(
+      () => CategoryListBloc(getCategories: i.get<GetCategories>()),
     );
   }
 

@@ -30,11 +30,18 @@ class DioClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          print(tokenStorage);
           // Attach Authorization header if we have an access token
           if (tokenStorage != null) {
             final accessToken = await tokenStorage!.getAccessToken();
+
             if (accessToken != null && accessToken.isNotEmpty) {
               options.headers['Authorization'] = 'Bearer $accessToken';
+              print('🔑 Attached Authorization header');
+            } else {
+              print(
+                '⚠️ No access token found; Authorization header not attached',
+              );
             }
           }
 
