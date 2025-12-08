@@ -5,11 +5,13 @@ import 'package:finly_app/core/constants/app_spacing.dart';
 import 'package:finly_app/core/theme/app_colors.dart';
 import 'package:finly_app/core/widgets/custom_button.dart';
 import 'package:finly_app/core/widgets/custom_text_field.dart';
+import 'package:finly_app/core/widgets/image_picker_field.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
 import 'package:finly_app/core/widgets/main_app_bar.dart';
 import 'package:finly_app/core/widgets/main_layout.dart';
 import 'package:finly_app/features/categories/presentation/widgets/category_card.dart';
-import 'package:finly_app/features/categories/presentation/widgets/categories_grid.dart'
-    show kCategories;
+import 'package:finly_app/features/categories/presentation/widgets/category_dropdown_field.dart';
 
 /// Add Expense screen with:
 /// - date field
@@ -34,7 +36,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
   final TextEditingController _amountCtrl = TextEditingController();
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _descCtrl = TextEditingController();
-  final TextEditingController _imageUrlCtrl = TextEditingController();
+  XFile? _imageFile;
+  Uint8List? _imageBytes;
 
   DateTime? _selectedDate;
   CategoryData? _selectedCategory;
@@ -48,7 +51,6 @@ class _AddExpensePageState extends State<AddExpensePage> {
   void initState() {
     super.initState();
     _selectedCategory = widget.initialCategory;
-    _imageUrlCtrl.addListener(() => setState(() {}));
   }
 
   @override
@@ -57,7 +59,6 @@ class _AddExpensePageState extends State<AddExpensePage> {
     _amountCtrl.dispose();
     _nameCtrl.dispose();
     _descCtrl.dispose();
-    _imageUrlCtrl.dispose();
     super.dispose();
   }
 
@@ -118,8 +119,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
       'amount': amount,
       'name': _nameCtrl.text.trim(),
       'description': _descCtrl.text.trim(),
-      // Backend will handle upload. We pass the URL if provided.
-      'imageUrl': _imageUrlCtrl.text.trim(),
+      // Image selected locally; caller should handle upload.
+      'imagePath': _imageFile?.path,
+      'imageBytes': _imageBytes,
     };
 
     Navigator.of(context).pop(payload);
@@ -151,62 +153,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
             AppSpacing.verticalSpaceMedium,
 
             // Category dropdown
-            Text(
-              'Category',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: AppColors.darkGrey,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            DropdownButtonFormField<CategoryData>(
+            CategoryDropdownField(
               value: _selectedCategory,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: AppColors.white,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 12,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: AppSpacing.borderRadiusLarge,
-                  borderSide: const BorderSide(
-                    color: AppColors.borderButtonPrimary,
-                    width: 1,
-                  ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: AppSpacing.borderRadiusLarge,
-                  borderSide: const BorderSide(
-                    color: AppColors.borderButtonPrimary,
-                    width: 1,
-                  ),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: AppSpacing.borderRadiusLarge,
-                  borderSide: const BorderSide(
-                    color: AppColors.errorColor,
-                    width: 1,
-                  ),
-                ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderRadius: AppSpacing.borderRadiusLarge,
-                  borderSide: const BorderSide(
-                    color: AppColors.errorColor,
-                    width: 2,
-                  ),
-                ),
-                errorText: _categoryError,
-              ),
-              items:
-                  kCategories
-                      .map(
-                        (c) => DropdownMenuItem<CategoryData>(
-                          value: c,
-                          child: Text(c.title),
-                        ),
-                      )
-                      .toList(),
+              errorText: _categoryError,
               onChanged:
                   (val) => setState(() {
                     _selectedCategory = val;
@@ -245,31 +194,16 @@ class _AddExpensePageState extends State<AddExpensePage> {
             ),
             AppSpacing.verticalSpaceMedium,
 
-            // Image URL (backend will upload)
-            CustomTextField(
-              controller: _imageUrlCtrl,
-              labelText: 'Image URL',
-              hintText: 'https://...',
+            // Receipt Image (selected from device)
+            ImagePickerField(
+              labelText: 'Receipt Image',
+              onChanged: (file, bytes) {
+                setState(() {
+                  _imageFile = file;
+                  _imageBytes = bytes;
+                });
+              },
             ),
-            const SizedBox(height: 8),
-            if (_imageUrlCtrl.text.trim().isNotEmpty)
-              ClipRRect(
-                borderRadius: AppSpacing.borderRadiusLarge,
-                child: AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: Image.network(
-                    _imageUrlCtrl.text.trim(),
-                    fit: BoxFit.cover,
-                    errorBuilder:
-                        (context, error, stackTrace) => Container(
-                          color: AppColors.borderButtonPrimary.withValues(
-                            alpha: 0.2,
-                          ),
-                          child: const Center(child: Text('Invalid image URL')),
-                        ),
-                  ),
-                ),
-              ),
 
             AppSpacing.verticalSpaceLarge,
             Center(

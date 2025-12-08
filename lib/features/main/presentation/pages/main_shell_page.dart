@@ -70,6 +70,8 @@ class _MainShellPageState extends State<MainShellPage> {
       case 5:
         Modular.to.navigate('/dashboard/settings');
         break;
+      default:
+        Modular.to.navigate('/dashboard/home');
     }
     // Force immediate rebuild for visual feedback.
     setState(() {});

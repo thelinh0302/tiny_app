@@ -36,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
       child: BlocListener<LoginBloc, LoginState>(
         listener: (context, state) {
           if (state.status == LoginStatus.submissionSuccess) {
-            Modular.to.navigate('/dashboard');
+            Modular.to.navigate('/dashboard/home');
           } else if (state.status == LoginStatus.submissionFailure) {
             AppAlert.error(context, state.errorMessage ?? 'Login failed');
           }
