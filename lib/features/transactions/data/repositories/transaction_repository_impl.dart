@@ -32,4 +32,30 @@ class TransactionRepositoryImpl implements TransactionRepository {
       return const Left(ServerFailure('Unknown error'));
     }
   }
+
+  @override
+  Future<Either<Failure, bool>> createTransaction({
+    required String categoryId,
+    required String name,
+    required int amount,
+    required DateTime date,
+    String? note,
+    String? attachmentUrl,
+  }) async {
+    try {
+      final bool success = await remote.createTransaction(
+        categoryId: categoryId,
+        name: name,
+        amount: amount,
+        date: date,
+        note: note,
+        attachmentUrl: attachmentUrl,
+      );
+      return Right(success);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return const Left(ServerFailure('Unknown error'));
+    }
+  }
 }

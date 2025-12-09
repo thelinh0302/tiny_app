@@ -9,4 +9,13 @@ abstract class TransactionRepository {
     required String period,
     required String categoryId,
   });
+
+  Future<Either<Failure, bool>> createTransaction({
+    required String categoryId,
+    required String name,
+    required int amount,
+    required DateTime date,
+    String? note,
+    String? attachmentUrl,
+  });
 }

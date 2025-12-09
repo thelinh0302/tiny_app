@@ -24,6 +24,8 @@ import 'package:finly_app/features/categories/presentation/bloc/category_list_bl
 import 'package:finly_app/core/network/dio_client.dart';
 import 'package:finly_app/features/categories/domain/usecases/create_category.dart';
 import 'package:finly_app/features/categories/presentation/bloc/add_category_bloc.dart';
+import 'package:finly_app/features/transactions/domain/usecases/create_transaction.dart';
+import 'package:finly_app/features/transactions/presentation/bloc/add_expense_bloc.dart';
 
 /// Category feature module.
 ///
@@ -94,6 +96,14 @@ class CategoryModule extends Module {
     );
     i.add<CategoryTransactionsBloc>(
       () => CategoryTransactionsBloc(getTransactions: i.get<GetTransactions>()),
+    );
+
+    // Create transaction use case + AddExpenseBloc
+    i.addLazySingleton<CreateTransaction>(
+      () => CreateTransaction(i.get<TransactionRepository>()),
+    );
+    i.add<AddExpenseBloc>(
+      () => AddExpenseBloc(createTransaction: i.get<CreateTransaction>()),
     );
   }
 

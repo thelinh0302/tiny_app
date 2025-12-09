@@ -14,6 +14,8 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:finly_app/features/categories/presentation/bloc/category_list_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:intl/intl.dart';
+import 'package:finly_app/features/transactions/presentation/bloc/add_expense_bloc.dart';
+import 'package:finly_app/core/widgets/app_alert.dart';
 
 /// Add Expense screen with:
 /// - date field
@@ -49,27 +51,32 @@ class _AddExpensePageState extends State<AddExpensePage> {
   String? _categoryError;
   String? _dateError;
 
-  void _onAmountChanged(String value) {
+  void _onAmountChanged(BuildContext context, String value) {
     final localeCode = context.locale.languageCode.toLowerCase();
     final isVi = localeCode.startsWith('vi');
     final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitsOnly.isEmpty) {
       _amountCtrl.value = const TextEditingValue(text: '');
-      setState(() {});
+      BlocProvider.of<AddExpenseBloc>(
+        context,
+      ).add(const AddExpenseAmountChanged(null));
       return;
     }
     if (isVi) {
-      final int amount = int.parse(digitsOnly);
+      final int amountUnits = int.parse(digitsOnly);
       final formatter = NumberFormat.currency(
         locale: 'vi_VN',
         symbol: '₫',
         decimalDigits: 0,
       );
-      final formatted = formatter.format(amount);
+      final formatted = formatter.format(amountUnits);
       _amountCtrl.value = TextEditingValue(
         text: formatted,
         selection: TextSelection.collapsed(offset: formatted.length),
       );
+      BlocProvider.of<AddExpenseBloc>(
+        context,
+      ).add(AddExpenseAmountChanged(amountUnits));
     } else {
       final int cents = int.parse(digitsOnly);
       final double amount = cents / 100;
@@ -83,10 +90,10 @@ class _AddExpensePageState extends State<AddExpensePage> {
         text: formatted,
         selection: TextSelection.collapsed(offset: formatted.length),
       );
+      BlocProvider.of<AddExpenseBloc>(
+        context,
+      ).add(AddExpenseAmountChanged(cents));
     }
-    setState(() {
-      _amountError = null;
-    });
   }
 
   @override
@@ -104,7 +111,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     super.dispose();
   }
 
-  Future<void> _pickDate() async {
+  Future<void> _pickDate(BuildContext context) async {
     final DateTime now = DateTime.now();
     final DateTime initialDate = _selectedDate ?? now;
     final DateTime first = DateTime(2000);
@@ -139,186 +146,241 @@ class _AddExpensePageState extends State<AddExpensePage> {
       pickedTime.minute,
     );
 
-    setState(() {
-      _selectedDate = combined;
-      final DateFormat formatter = DateFormat('MM-dd-yyyy HH:mm');
-      _dateCtrl.text = formatter.format(combined);
-      _dateError = null;
-    });
-  }
-
-  void _save() {
-    setState(() {
-      _amountError = null;
-      _nameError = null;
-      _categoryError = null;
-      _dateError = null;
-    });
-
-    if (_selectedDate == null) {
-      _dateError = 'Please select a date';
-    }
-    if (_selectedCategory == null) {
-      _categoryError = 'Please select a category';
-    }
-    if (_nameCtrl.text.trim().isEmpty) {
-      _nameError = 'Please enter a name';
-    }
-    final String rawAmount = _amountCtrl.text.trim();
-    final String localeCode = context.locale.languageCode.toLowerCase();
-    final bool isVi = localeCode.startsWith('vi');
-    final String digitsOnly = rawAmount.replaceAll(RegExp(r'[^0-9]'), '');
-    double? amount;
-    if (digitsOnly.isEmpty) {
-      amount = null;
-    } else if (isVi) {
-      // VND formatted without decimals -> digitsOnly already in units
-      amount = double.tryParse(digitsOnly);
-    } else {
-      // USD formatted as dollars with 2 decimals -> digitsOnly are cents
-      final double? cents = double.tryParse(digitsOnly);
-      amount = cents != null ? cents / 100.0 : null;
-    }
-    if (amount == null || amount <= 0) {
-      _amountError = 'Please enter a valid amount';
-    }
-
-    if (_dateError != null ||
-        _categoryError != null ||
-        _nameError != null ||
-        _amountError != null) {
-      setState(() {});
-      return;
-    }
+    final DateFormat formatter = DateFormat('MM-dd-yyyy HH:mm');
+    _dateCtrl.text = formatter.format(combined);
+    BlocProvider.of<AddExpenseBloc>(
+      context,
+    ).add(AddExpenseDateChanged(combined));
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<CategoryListBloc>(
-      create:
-          (_) =>
-              Modular.get<CategoryListBloc>()
-                ..add(const CategoryListRequested(page: 1, pageSize: 20)),
-      child: MainLayout(
-        appBar: const MainAppBar(titleKey: 'Add Expense'),
-        enableContentScroll: true,
-        topHeightRatio: 0.2,
-        topChild: null,
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.horizontalMedium),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppSpacing.verticalSpaceMedium,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<CategoryListBloc>(
+          create:
+              (_) =>
+                  Modular.get<CategoryListBloc>()
+                    ..add(const CategoryListRequested(page: 1, pageSize: 20)),
+        ),
+        BlocProvider<AddExpenseBloc>(
+          create:
+              (_) =>
+                  Modular.get<AddExpenseBloc>()..add(
+                    AddExpenseInitialized(categoryId: widget.initialCategory),
+                  ),
+        ),
+      ],
+      child: BlocListener<AddExpenseBloc, AddExpenseState>(
+        listenWhen: (p, c) => p.status != c.status,
+        listener: (context, state) {
+          if (state.status == AddExpenseStatus.submissionSuccess) {
+            // Avoid showing SnackBar here to prevent overlay issues causing black screen on pop
+            Navigator.of(context).pop(true);
+            return;
+          } else if (state.status == AddExpenseStatus.submissionFailure &&
+              state.errorMessage != null) {
+            AppAlert.error(context, state.errorMessage!);
+          }
 
-              // Date field
-              CustomTextField(
-                controller: _dateCtrl,
-                labelText: 'Date & Time',
-                hintText: 'MM-DD-YYYY HH:mm',
-                readOnly: true,
-                onTap: _pickDate,
-                errorText: _dateError,
-              ),
-              AppSpacing.verticalSpaceMedium,
+          // Keep date controller in sync
+          if (state.date.value != null) {
+            final DateFormat formatter = DateFormat('MM-dd-yyyy HH:mm');
+            _dateCtrl.text = formatter.format(state.date.value!);
+          }
+        },
+        child: MainLayout(
+          appBar: const MainAppBar(titleKey: 'Add Expense'),
+          enableContentScroll: true,
+          topHeightRatio: 0.2,
+          topChild: null,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.horizontalMedium),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AppSpacing.verticalSpaceMedium,
 
-              // Category dropdown (driven by CategoryListBloc)
-              BlocBuilder<CategoryListBloc, CategoryListState>(
-                builder: (context, state) {
-                  final List<DropdownMenuItem<String>> items =
-                      <DropdownMenuItem<String>>[];
-                  if (state is CategoryListLoadSuccess) {
-                    final Set<String> seen = <String>{};
-                    for (final e in state.items) {
-                      final String id = e.id;
-                      if (seen.add(id)) {
-                        items.add(
-                          DropdownMenuItem<String>(
-                            value: id,
-                            child: Text(e.name),
-                          ),
-                        );
+                // Date field
+                BlocBuilder<AddExpenseBloc, AddExpenseState>(
+                  buildWhen: (p, c) => p.date != c.date,
+                  builder: (context, state) {
+                    final dateError =
+                        context.select((AddExpenseBloc b) => b.state.showErrors)
+                            ? (state.date.value == null
+                                ? 'Please select a date'
+                                : null)
+                            : null;
+                    return CustomTextField(
+                      controller: _dateCtrl,
+                      labelText: 'Date & Time',
+                      hintText: 'MM-DD-YYYY HH:mm',
+                      readOnly: true,
+                      onTap: () => _pickDate(context),
+                      errorText: dateError,
+                    );
+                  },
+                ),
+                AppSpacing.verticalSpaceMedium,
+
+                // Category dropdown (driven by CategoryListBloc)
+                BlocBuilder<CategoryListBloc, CategoryListState>(
+                  builder: (context, catState) {
+                    final List<DropdownMenuItem<String>> items =
+                        <DropdownMenuItem<String>>[];
+                    if (catState is CategoryListLoadSuccess) {
+                      final Set<String> seen = <String>{};
+                      for (final e in catState.items) {
+                        final String id = e.id;
+                        if (seen.add(id)) {
+                          items.add(
+                            DropdownMenuItem<String>(
+                              value: id,
+                              child: Text(e.name),
+                            ),
+                          );
+                        }
                       }
                     }
-                  }
 
-                  final bool hasSelected =
-                      items.where((m) => m.value == _selectedCategory).length ==
-                      1;
-                  final String? selectedId =
-                      hasSelected ? _selectedCategory : null;
-
-                  return CustomDropdownField<String>(
-                    labelText: 'Category',
-                    value: selectedId,
-                    items: items,
-                    errorText: _categoryError,
-                    placeholderText: 'Select category',
-                    enabled: state is! CategoryListLoadInProgress,
-                    onChanged:
-                        (String? val) => setState(() {
-                          _selectedCategory = val;
-                          _categoryError = null;
-                        }),
-                  );
-                },
-              ),
-              AppSpacing.verticalSpaceMedium,
-
-              // Amount
-              CustomTextField(
-                controller: _amountCtrl,
-                labelText: 'Amount',
-                hintText:
-                    context.locale.languageCode.toLowerCase().startsWith('vi')
-                        ? '0 ₫'
-                        : '\$0.00',
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+                    return BlocBuilder<AddExpenseBloc, AddExpenseState>(
+                      buildWhen: (p, c) => p.categoryId != c.categoryId,
+                      builder: (context, state) {
+                        final categoryError =
+                            context.select(
+                                  (AddExpenseBloc b) => b.state.showErrors,
+                                )
+                                ? (state.categoryId.value == null
+                                    ? 'Please select a category'
+                                    : null)
+                                : null;
+                        return CustomDropdownField<String>(
+                          labelText: 'Category',
+                          value: state.categoryId.value,
+                          items: items,
+                          errorText: categoryError,
+                          placeholderText: 'Select category',
+                          enabled: catState is! CategoryListLoadInProgress,
+                          onChanged:
+                              (String? val) => BlocProvider.of<AddExpenseBloc>(
+                                context,
+                              ).add(AddExpenseCategoryChanged(val)),
+                        );
+                      },
+                    );
+                  },
                 ),
-                onChanged: _onAmountChanged,
-                errorText: _amountError,
-              ),
-              AppSpacing.verticalSpaceMedium,
+                AppSpacing.verticalSpaceMedium,
 
-              // Name
-              CustomTextField(
-                controller: _nameCtrl,
-                labelText: 'Name',
-                hintText: 'e.g., Lunch',
-                errorText: _nameError,
-              ),
-              AppSpacing.verticalSpaceMedium,
-
-              // Description
-              CustomTextField(
-                controller: _descCtrl,
-                labelText: 'Description',
-                hintText: 'Optional details',
-                maxLines: 3,
-              ),
-              AppSpacing.verticalSpaceMedium,
-
-              // Receipt Image (selected from device)
-              ImagePickerField(
-                labelText: 'Receipt Image',
-                onChanged: (file, bytes) {
-                  setState(() {
-                    _imageFile = file;
-                    _imageBytes = bytes;
-                  });
-                },
-              ),
-
-              AppSpacing.verticalSpaceLarge,
-              Center(
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width * 0.5,
-                  child: PrimaryButton(text: 'Save', onPressed: _save),
+                // Amount
+                BlocBuilder<AddExpenseBloc, AddExpenseState>(
+                  buildWhen: (p, c) => p.amount != c.amount,
+                  builder: (context, state) {
+                    final amountError =
+                        context.select((AddExpenseBloc b) => b.state.showErrors)
+                            ? ((state.amount.value == null ||
+                                    state.amount.value! <= 0)
+                                ? 'Please enter a valid amount'
+                                : null)
+                            : null;
+                    return CustomTextField(
+                      controller: _amountCtrl,
+                      labelText: 'Amount',
+                      hintText:
+                          context.locale.languageCode.toLowerCase().startsWith(
+                                'vi',
+                              )
+                              ? '0 ₫'
+                              : '\$0.00',
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      onChanged: (val) => _onAmountChanged(context, val),
+                      errorText: amountError,
+                    );
+                  },
                 ),
-              ),
-              AppSpacing.verticalSpaceLarge,
-            ],
+                AppSpacing.verticalSpaceMedium,
+
+                // Name
+                BlocBuilder<AddExpenseBloc, AddExpenseState>(
+                  buildWhen: (p, c) => p.name != c.name,
+                  builder: (context, state) {
+                    final nameError =
+                        context.select((AddExpenseBloc b) => b.state.showErrors)
+                            ? (state.name.value.trim().isEmpty
+                                ? 'Please enter a name'
+                                : null)
+                            : null;
+                    return CustomTextField(
+                      controller: _nameCtrl,
+                      labelText: 'Name',
+                      hintText: 'e.g., Lunch',
+                      onChanged:
+                          (val) => BlocProvider.of<AddExpenseBloc>(
+                            context,
+                          ).add(AddExpenseNameChanged(val)),
+                      errorText: nameError,
+                    );
+                  },
+                ),
+                AppSpacing.verticalSpaceMedium,
+
+                // Description
+                BlocBuilder<AddExpenseBloc, AddExpenseState>(
+                  buildWhen: (p, c) => p.note != c.note,
+                  builder: (context, state) {
+                    return CustomTextField(
+                      controller: _descCtrl,
+                      labelText: 'Description',
+                      hintText: 'Optional details',
+                      maxLines: 3,
+                      onChanged:
+                          (val) => BlocProvider.of<AddExpenseBloc>(
+                            context,
+                          ).add(AddExpenseNoteChanged(val)),
+                    );
+                  },
+                ),
+                AppSpacing.verticalSpaceMedium,
+
+                // Receipt Image (selected from device)
+                ImagePickerField(
+                  labelText: 'Receipt Image',
+                  onChanged: (file, bytes) {
+                    setState(() {
+                      _imageFile = file;
+                      _imageBytes = bytes;
+                    });
+                    // No upload here; attachmentUrl remains null for now
+                  },
+                ),
+
+                AppSpacing.verticalSpaceLarge,
+                Center(
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: BlocBuilder<AddExpenseBloc, AddExpenseState>(
+                      buildWhen: (p, c) => p.status != c.status,
+                      builder: (context, state) {
+                        final isLoading =
+                            state.status ==
+                            AddExpenseStatus.submissionInProgress;
+                        return PrimaryButton(
+                          text: 'Save',
+                          isLoading: isLoading,
+                          onPressed:
+                              () => BlocProvider.of<AddExpenseBloc>(
+                                context,
+                              ).add(const AddExpenseSubmitted()),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                AppSpacing.verticalSpaceLarge,
+              ],
+            ),
           ),
         ),
       ),

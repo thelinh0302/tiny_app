@@ -10,6 +10,15 @@ abstract class TransactionRemoteDataSource {
     required String period,
     required String categoryId,
   });
+
+  Future<bool> createTransaction({
+    required String categoryId,
+    required String name,
+    required int amount,
+    required DateTime date,
+    String? note,
+    String? attachmentUrl,
+  });
 }
 
 class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
@@ -39,6 +48,36 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
       );
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Failed to fetch transactions');
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<bool> createTransaction({
+    required String categoryId,
+    required String name,
+    required int amount,
+    required DateTime date,
+    String? note,
+    String? attachmentUrl,
+  }) async {
+    try {
+      final Response res = await client.post(
+        '/transactions',
+        data: {
+          'categoryId': categoryId,
+          'name': name,
+          'amount': amount,
+          'note': note,
+          'date': date.toUtc().toIso8601String(),
+          'attachmentUrl': attachmentUrl,
+        },
+      );
+      final data = res.data as Map<String, dynamic>;
+      return (data['success'] as bool?) ?? false;
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to create transaction');
     } catch (e) {
       throw ServerException(e.toString());
     }

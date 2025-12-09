@@ -63,7 +63,7 @@ class _AddCategoryPageState extends State<AddCategoryPage> {
                     listenWhen: (p, c) => p.status != c.status,
                     listener: (context, state) {
                       if (state.status == AddCategoryStatus.submissionSuccess) {
-                        Navigator.of(context).pop();
+                        Navigator.of(context).pop(true);
                       } else if (state.status ==
                               AddCategoryStatus.submissionFailure &&
                           state.errorMessage != null) {

@@ -114,11 +114,20 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
                       SliverToBoxAdapter(
                         child: CategoryTransactionsList(
                           transactions: mapped,
-                          onAddExpense: () {
-                            Modular.to.pushNamed(
+                          onAddExpense: () async {
+                            final result = await Modular.to.pushNamed(
                               '/dashboard/category/add-expense',
                               arguments: widget.category.id,
                             );
+                            if (result == true) {
+                              _bloc.add(
+                                CategoryTransactionsRequested(
+                                  categoryId: widget.category.id,
+                                  period: 'day',
+                                  pageSize: 20,
+                                ),
+                              );
+                            }
                           },
                         ),
                       ),
