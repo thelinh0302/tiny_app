@@ -62,6 +62,17 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
     String? note,
     String? attachmentUrl,
   }) async {
+    final String payloadDateIso =
+        DateTime.utc(
+          date.year,
+          date.month,
+          date.day,
+          date.hour,
+          date.minute,
+          date.second,
+          date.millisecond,
+          date.microsecond,
+        ).toIso8601String();
     try {
       final Response res = await client.post(
         '/transactions',
@@ -70,7 +81,7 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
           'name': name,
           'amount': amount,
           'note': note,
-          'date': date.toUtc().toIso8601String(),
+          'date': payloadDateIso,
           'attachmentUrl': attachmentUrl,
         },
       );
