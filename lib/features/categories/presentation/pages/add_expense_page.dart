@@ -105,22 +105,46 @@ class _AddExpensePageState extends State<AddExpensePage> {
   }
 
   Future<void> _pickDate() async {
-    final DateTime initial = _selectedDate ?? DateTime.now();
+    final DateTime now = DateTime.now();
+    final DateTime initialDate = _selectedDate ?? now;
     final DateTime first = DateTime(2000);
     final DateTime last = DateTime(2100);
-    final picked = await showDatePicker(
+
+    final DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: initial,
+      initialDate: initialDate,
       firstDate: first,
       lastDate: last,
     );
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-        _dateCtrl.text = picked.toIso8601String().split('T').first;
-        _dateError = null;
-      });
-    }
+
+    if (pickedDate == null) return;
+
+    final TimeOfDay initialTime =
+        _selectedDate != null
+            ? TimeOfDay.fromDateTime(_selectedDate!)
+            : TimeOfDay.fromDateTime(now);
+
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: initialTime,
+    );
+
+    if (pickedTime == null) return;
+
+    final DateTime combined = DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+
+    setState(() {
+      _selectedDate = combined;
+      final DateFormat formatter = DateFormat('MM-dd-yyyy HH:mm');
+      _dateCtrl.text = formatter.format(combined);
+      _dateError = null;
+    });
   }
 
   void _save() {
@@ -190,8 +214,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
               // Date field
               CustomTextField(
                 controller: _dateCtrl,
-                labelText: 'Date',
-                hintText: 'MM-DD-YYYY',
+                labelText: 'Date & Time',
+                hintText: 'MM-DD-YYYY HH:mm',
                 readOnly: true,
                 onTap: _pickDate,
                 errorText: _dateError,
