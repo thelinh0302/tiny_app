@@ -1,3 +1,8 @@
+import 'package:finly_app/features/categories/presentation/bloc/category_transactions_bloc.dart';
+import 'package:finly_app/features/transactions/data/datasources/transaction_remote_data_source.dart';
+import 'package:finly_app/features/transactions/data/repositories/transaction_repository_impl.dart';
+import 'package:finly_app/features/transactions/domain/repositories/transaction_repository.dart';
+import 'package:finly_app/features/transactions/domain/usecases/get_transactions.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 import 'package:finly_app/core/services/imagekit_service.dart';
@@ -73,6 +78,22 @@ class CategoryModule extends Module {
     );
     i.add<AddCategoryBloc>(
       () => AddCategoryBloc(createCategory: i.get<CreateCategory>()),
+    );
+
+    // Transactions for category: remote -> repo -> usecase -> bloc
+    i.addLazySingleton<TransactionRemoteDataSource>(
+      () => TransactionRemoteDataSourceImpl(client: Modular.get<DioClient>()),
+    );
+    i.addLazySingleton<TransactionRepository>(
+      () => TransactionRepositoryImpl(
+        remote: i.get<TransactionRemoteDataSource>(),
+      ),
+    );
+    i.addLazySingleton<GetTransactions>(
+      () => GetTransactions(i.get<TransactionRepository>()),
+    );
+    i.add<CategoryTransactionsBloc>(
+      () => CategoryTransactionsBloc(getTransactions: i.get<GetTransactions>()),
     );
   }
 

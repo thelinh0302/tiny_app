@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:finly_app/core/constants/app_sizes.dart';
 import 'package:finly_app/core/constants/app_spacing.dart';
 import 'package:finly_app/core/theme/app_colors.dart';
+import 'package:finly_app/features/categories/presentation/widgets/helpers/icon_widget.dart';
 
 /// Reusable transaction list item used in the Category Transactions screen.
 /// Matches the design: leading circular icon, title, time-date subtitle,
@@ -54,7 +55,7 @@ class TransactionItem extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(10.0),
-                  child: SvgPicture.asset(iconAsset, fit: BoxFit.contain),
+                  child: buildCategoryIcon(iconAsset),
                 ),
               ),
             ),
