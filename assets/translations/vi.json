@@ -155,6 +155,16 @@
     },
     "icon": {
       "label": "Biểu tượng danh mục"
+    },
+    "empty": {
+      "title": "Không có danh mục",
+      "subtitle": "Bạn chưa tạo danh mục nào."
+    },
+    "transactions": {
+      "empty": {
+        "title": "Không có giao dịch",
+        "subtitle": "Chưa có giao dịch nào trong danh mục này."
+      }
     }
   },
   "Categories": "Danh mục",

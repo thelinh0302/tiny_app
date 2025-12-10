@@ -166,6 +166,16 @@
       "nameRequired": "Please enter a category name",
       "typeRequired": "Please select a type",
       "iconRequired": "Please select an icon"
+    },
+    "empty": {
+      "title": "No Categories",
+      "subtitle": "You haven't created any categories yet."
+    },
+    "transactions": {
+      "empty": {
+        "title": "No Transactions",
+        "subtitle": "There are no transactions in this category yet."
+      }
     }
   },
   "Categories": "Categories",

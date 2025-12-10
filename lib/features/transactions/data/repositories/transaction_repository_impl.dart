@@ -37,7 +37,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
   Future<Either<Failure, bool>> createTransaction({
     required String categoryId,
     required String name,
-    required int amount,
+    required double amount,
     required DateTime date,
     String? note,
     String? attachmentUrl,

@@ -36,6 +36,9 @@ class AppImages {
   // UI icons
   static const String notification = '$_base/noti_icon.svg';
 
+  // Illustrations
+  static const String noResult = '$_base/no_result.svg';
+
   // Example placeholders (add your PNGs/SVGs here)
   // static const String logoPng = '$_base/logo.png';
   // static const String iconSvg = '$_base/icon.svg';

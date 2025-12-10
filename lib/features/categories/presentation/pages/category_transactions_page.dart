@@ -36,7 +36,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
     _bloc.add(
       CategoryTransactionsRequested(
         categoryId: widget.category.id,
-        period: 'day',
+        period: '',
         pageSize: 20,
       ),
     );
@@ -123,7 +123,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
                               _bloc.add(
                                 CategoryTransactionsRequested(
                                   categoryId: widget.category.id,
-                                  period: 'day',
+                                  period: '',
                                   pageSize: 20,
                                 ),
                               );

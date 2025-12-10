@@ -25,7 +25,7 @@ class CreateTransaction implements UseCase<bool, CreateTransactionParams> {
 class CreateTransactionParams extends Equatable {
   final String categoryId;
   final String name;
-  final int amount; // minimal unit (VND units or USD cents)
+  final double amount; // major unit (e.g., 21.21 USD or 20000 VND)
   final DateTime date; // UTC or local converted to UTC by data source
   final String? note;
   final String? attachmentUrl;

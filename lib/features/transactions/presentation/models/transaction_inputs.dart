@@ -29,15 +29,15 @@ class TxnCategoryIdInput
   }
 }
 
-// Amount minimal unit (e.g., VND units or USD cents) required > 0
+// Amount in major unit (e.g., USD dollars or VND units) required > 0
 enum TxnAmountValidationError { empty, invalid }
 
-class TxnAmountInput extends FormzInput<int?, TxnAmountValidationError> {
+class TxnAmountInput extends FormzInput<double?, TxnAmountValidationError> {
   const TxnAmountInput.pure() : super.pure(null);
-  const TxnAmountInput.dirty([int? value]) : super.dirty(value);
+  const TxnAmountInput.dirty([double? value]) : super.dirty(value);
 
   @override
-  TxnAmountValidationError? validator(int? value) {
+  TxnAmountValidationError? validator(double? value) {
     if (value == null) return TxnAmountValidationError.empty;
     if (value <= 0) return TxnAmountValidationError.invalid;
     return null;

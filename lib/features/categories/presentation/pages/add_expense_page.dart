@@ -40,7 +40,6 @@ class _AddExpensePageState extends State<AddExpensePage> {
   final TextEditingController _amountCtrl = TextEditingController();
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _descCtrl = TextEditingController();
-  XFile? _imageFile;
   Uint8List? _imageBytes;
 
   DateTime? _selectedDate;
@@ -55,13 +54,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
     final localeCode = context.locale.languageCode.toLowerCase();
     final isVi = localeCode.startsWith('vi');
     final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
-    if (digitsOnly.isEmpty) {
-      _amountCtrl.value = const TextEditingValue(text: '');
-      BlocProvider.of<AddExpenseBloc>(
-        context,
-      ).add(const AddExpenseAmountChanged(null));
-      return;
-    }
+    // Note: emptiness handled per-locale below
     if (isVi) {
       final int amountUnits = int.parse(digitsOnly);
       final formatter = NumberFormat.currency(
@@ -76,23 +69,50 @@ class _AddExpensePageState extends State<AddExpensePage> {
       );
       BlocProvider.of<AddExpenseBloc>(
         context,
-      ).add(AddExpenseAmountChanged(amountUnits));
+      ).add(AddExpenseAmountChanged(amountUnits.toDouble()));
     } else {
-      final int cents = int.parse(digitsOnly);
-      final double amount = cents / 100;
+      // EN/US: Always show 2 decimals; keep caret before decimals so typing appends to major part
+      final hasDot = value.contains('.');
+      String raw = value.replaceAll(RegExp(r'[^0-9]'), '');
+
+      // If empty, clear
+      if (raw.isEmpty) {
+        _amountCtrl.value = const TextEditingValue(text: '');
+        BlocProvider.of<AddExpenseBloc>(
+          context,
+        ).add(const AddExpenseAmountChanged(null));
+        return;
+      }
+
+      // Derive major digits: if value already had decimals (dot present), strip last 2 digits as cents placeholder
+      String majorDigits = raw;
+      if (hasDot && majorDigits.length >= 2) {
+        majorDigits = majorDigits.substring(0, majorDigits.length - 2);
+      }
+
+      // Parse major amount
+      final double major = majorDigits.isEmpty ? 0 : double.parse(majorDigits);
+
+      // Format with fixed 2 decimals
       final formatter = NumberFormat.currency(
         locale: 'en_US',
         symbol: r'$',
         decimalDigits: 2,
       );
-      final formatted = formatter.format(amount);
+      final formatted = formatter.format(major);
+
+      // Place cursor before the decimals
+      final caretPos = formatted.length - 3; // just before .xx
       _amountCtrl.value = TextEditingValue(
         text: formatted,
-        selection: TextSelection.collapsed(offset: formatted.length),
+        selection: TextSelection.collapsed(
+          offset: caretPos.clamp(0, formatted.length),
+        ),
       );
+
       BlocProvider.of<AddExpenseBloc>(
         context,
-      ).add(AddExpenseAmountChanged(cents));
+      ).add(AddExpenseAmountChanged(major));
     }
   }
 
@@ -349,7 +369,6 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   labelText: 'Receipt Image',
                   onChanged: (file, bytes) {
                     setState(() {
-                      _imageFile = file;
                       _imageBytes = bytes;
                     });
                     // No upload here; attachmentUrl remains null for now

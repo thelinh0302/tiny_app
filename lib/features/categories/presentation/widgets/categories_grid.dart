@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:finly_app/core/constants/app_spacing.dart';
 import 'package:finly_app/features/categories/presentation/widgets/add_category_card.dart';
 import 'package:finly_app/features/categories/presentation/widgets/category_card.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:finly_app/core/widgets/no_result_widget.dart';
 
 /// Grid displaying all categories plus a trailing "Add" tile.
 class CategoriesGrid extends StatelessWidget {
@@ -19,7 +21,7 @@ class CategoriesGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
+    final grid = GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -41,5 +43,22 @@ class CategoriesGrid extends StatelessWidget {
         );
       },
     );
+
+    if (categories.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          NoResultWidget(
+            title: 'category.empty.title'.tr(),
+            subtitle: 'category.empty.subtitle'.tr(),
+          ),
+          const SizedBox(height: AppSpacing.verticalLarge),
+          grid,
+        ],
+      );
+    }
+
+    return grid;
   }
 }

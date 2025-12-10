@@ -4,6 +4,8 @@ import 'package:finly_app/core/widgets/custom_button.dart';
 import 'package:finly_app/features/categories/presentation/models/category_transaction.dart';
 import 'package:finly_app/features/categories/presentation/widgets/section_header.dart';
 import 'package:finly_app/features/categories/presentation/widgets/transaction_item.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:finly_app/core/widgets/no_result_widget.dart';
 
 /// Renders grouped category transactions by month-year, and the "Add Expenses"
 /// button. Accepts a flat list of CategoryTransaction and groups internally.
@@ -19,6 +21,25 @@ class CategoryTransactionsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Empty state
+    if (transactions.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          NoResultWidget(
+            title: 'category.transactions.empty.title'.tr(),
+            subtitle: 'category.transactions.empty.subtitle'.tr(),
+          ),
+          const SizedBox(height: AppSpacing.verticalLarge),
+          SafeArea(
+            top: false,
+            child: PrimaryButton(text: 'Add Expenses', onPressed: onAddExpense),
+          ),
+        ],
+      );
+    }
+
     // Sort by most recent first
     final List<CategoryTransaction> sorted = [...transactions]
       ..sort((a, b) => b.dateTime.compareTo(a.dateTime));

@@ -34,7 +34,7 @@ class AddExpenseCategoryChanged extends AddExpenseEvent {
 }
 
 class AddExpenseAmountChanged extends AddExpenseEvent {
-  final int? amount;
+  final double? amount;
   const AddExpenseAmountChanged(this.amount);
 
   @override

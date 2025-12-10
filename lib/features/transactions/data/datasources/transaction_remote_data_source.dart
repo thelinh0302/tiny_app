@@ -14,7 +14,7 @@ abstract class TransactionRemoteDataSource {
   Future<bool> createTransaction({
     required String categoryId,
     required String name,
-    required int amount,
+    required double amount,
     required DateTime date,
     String? note,
     String? attachmentUrl,
@@ -57,7 +57,7 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
   Future<bool> createTransaction({
     required String categoryId,
     required String name,
-    required int amount,
+    required double amount,
     required DateTime date,
     String? note,
     String? attachmentUrl,
