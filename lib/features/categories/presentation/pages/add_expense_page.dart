@@ -53,30 +53,13 @@ class _AddExpensePageState extends State<AddExpensePage> {
   void _onAmountChanged(BuildContext context, String value) {
     final localeCode = context.locale.languageCode.toLowerCase();
     final isVi = localeCode.startsWith('vi');
-    final digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
-    // Note: emptiness handled per-locale below
-    if (isVi) {
-      final int amountUnits = int.parse(digitsOnly);
-      final formatter = NumberFormat.currency(
-        locale: 'vi_VN',
-        symbol: '₫',
-        decimalDigits: 0,
-      );
-      final formatted = formatter.format(amountUnits);
-      _amountCtrl.value = TextEditingValue(
-        text: formatted,
-        selection: TextSelection.collapsed(offset: formatted.length),
-      );
-      BlocProvider.of<AddExpenseBloc>(
-        context,
-      ).add(AddExpenseAmountChanged(amountUnits.toDouble()));
-    } else {
-      // EN/US: Always show 2 decimals; keep caret before decimals so typing appends to major part
-      final hasDot = value.contains('.');
-      String raw = value.replaceAll(RegExp(r'[^0-9]'), '');
 
-      // If empty, clear
-      if (raw.isEmpty) {
+    // --------------------- //
+    // VIETNAMESE            //
+    // --------------------- //
+    if (isVi) {
+      final digits = value.replaceAll(RegExp(r'[^0-9]'), '');
+      if (digits.isEmpty) {
         _amountCtrl.value = const TextEditingValue(text: '');
         BlocProvider.of<AddExpenseBloc>(
           context,
@@ -84,36 +67,96 @@ class _AddExpensePageState extends State<AddExpensePage> {
         return;
       }
 
-      // Derive major digits: if value already had decimals (dot present), strip last 2 digits as cents placeholder
-      String majorDigits = raw;
-      if (hasDot && majorDigits.length >= 2) {
-        majorDigits = majorDigits.substring(0, majorDigits.length - 2);
-      }
+      final amount = int.tryParse(digits) ?? 0;
 
-      // Parse major amount
-      final double major = majorDigits.isEmpty ? 0 : double.parse(majorDigits);
+      final formatted = NumberFormat.currency(
+        locale: 'vi_VN',
+        symbol: '₫',
+        decimalDigits: 0,
+      ).format(amount);
 
-      // Format with fixed 2 decimals
-      final formatter = NumberFormat.currency(
-        locale: 'en_US',
-        symbol: r'$',
-        decimalDigits: 2,
-      );
-      final formatted = formatter.format(major);
-
-      // Place cursor before the decimals
-      final caretPos = formatted.length - 3; // just before .xx
+      // Always push caret to end
       _amountCtrl.value = TextEditingValue(
         text: formatted,
-        selection: TextSelection.collapsed(
-          offset: caretPos.clamp(0, formatted.length),
-        ),
+        selection: TextSelection.collapsed(offset: formatted.length),
       );
 
       BlocProvider.of<AddExpenseBloc>(
         context,
-      ).add(AddExpenseAmountChanged(major));
+      ).add(AddExpenseAmountChanged(amount.toDouble()));
+      return;
     }
+
+    // --------------------- //
+    // EN (US Dollar)        //
+    // --------------------- //
+
+    final cleaned = value.replaceAll(RegExp(r'[^0-9.]'), '');
+
+    // CASE A: empty
+    if (cleaned.isEmpty) {
+      _amountCtrl.value = const TextEditingValue(text: '');
+      BlocProvider.of<AddExpenseBloc>(
+        context,
+      ).add(const AddExpenseAmountChanged(null));
+      return;
+    }
+
+    // Split number
+    final parts = cleaned.split('.');
+
+    // CASE B: user typing dot at the end → "5."
+    if (cleaned.endsWith('.')) {
+      final display = "${parts[0]}.";
+      _amountCtrl.value = TextEditingValue(
+        text: display,
+        selection: TextSelection.collapsed(offset: display.length),
+      );
+
+      BlocProvider.of<AddExpenseBloc>(
+        context,
+      ).add(AddExpenseAmountChanged(double.tryParse(parts[0]) ?? 0));
+      return;
+    }
+
+    // CASE C: decimals exist but not enough to format → "5.2"
+    if (parts.length == 2 && parts[1].length < 2) {
+      // Do NOT format yet — keep raw input
+      final display = cleaned;
+      _amountCtrl.value = TextEditingValue(
+        text: display,
+        selection: TextSelection.collapsed(offset: display.length),
+      );
+
+      final asDouble = double.tryParse(display) ?? 0;
+      BlocProvider.of<AddExpenseBloc>(
+        context,
+      ).add(AddExpenseAmountChanged(asDouble));
+      return;
+    }
+
+    // CASE D: Safe to format: "5.20", "12.34", "50.00"
+    String decimals = parts.length == 2 ? parts[1] : "00";
+    if (decimals.length > 2) decimals = decimals.substring(0, 2);
+
+    final amount = double.parse("${parts[0]}.$decimals");
+
+    final formatted = NumberFormat.currency(
+      locale: 'en_US',
+      symbol: r'$',
+      decimalDigits: 2,
+    ).format(amount);
+
+    final caretPos = formatted.length - 3; // before decimal part
+
+    _amountCtrl.value = TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: caretPos),
+    );
+
+    BlocProvider.of<AddExpenseBloc>(
+      context,
+    ).add(AddExpenseAmountChanged(amount));
   }
 
   @override
@@ -312,9 +355,9 @@ class _AddExpensePageState extends State<AddExpensePage> {
                               )
                               ? '0 ₫'
                               : '\$0.00',
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
+                      // keyboardType: const TextInputType.numberWithOptions(
+                      //   decimal: true,
+                      // ),
                       onChanged: (val) => _onAmountChanged(context, val),
                       errorText: amountError,
                     );
