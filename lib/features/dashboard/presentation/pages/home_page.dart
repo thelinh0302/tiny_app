@@ -15,7 +15,7 @@ class HomePage extends StatelessWidget {
       enableContentScroll: true,
       topChild: HomeHeader(),
       child: HomeOverviewSection(),
-      topHeightRatio: 0.60,
+      useIntrinsicTopHeight: true,
     );
   }
 }

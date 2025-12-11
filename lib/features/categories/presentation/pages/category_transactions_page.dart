@@ -72,7 +72,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
           progressAmountText: '7,783.00',
           subtitleText: '35% of your expenses, looks good.',
         ),
-        topHeightRatio: 0.58,
+        useIntrinsicTopHeight: true,
         enableContentScroll: false,
         child: Padding(
           padding: const EdgeInsets.symmetric(

@@ -9,6 +9,7 @@ class MainLayout extends StatelessWidget {
   final Color topColor;
   final BorderRadiusGeometry borderRadius;
   final bool enableContentScroll;
+  final bool useIntrinsicTopHeight;
 
   const MainLayout({
     super.key,
@@ -22,11 +23,65 @@ class MainLayout extends StatelessWidget {
       topRight: Radius.circular(40),
     ),
     this.enableContentScroll = false,
+    this.useIntrinsicTopHeight = false,
   });
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+
+    if (useIntrinsicTopHeight) {
+      return Scaffold(
+        appBar: appBar,
+        backgroundColor: topColor,
+        body: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            if (topChild != null)
+              SafeArea(
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: topChild!,
+                ),
+              ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: borderRadius,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: SafeArea(
+                    top: false,
+                    child:
+                        enableContentScroll
+                            ? LayoutBuilder(
+                              builder: (context, constraints) {
+                                return SingleChildScrollView(
+                                  padding: EdgeInsets.only(
+                                    bottom:
+                                        MediaQuery.of(
+                                          context,
+                                        ).viewInsets.bottom +
+                                        20,
+                                  ),
+                                  child: child,
+                                );
+                              },
+                            )
+                            : child,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     final double topHeight = size.height * topHeightRatio;
 

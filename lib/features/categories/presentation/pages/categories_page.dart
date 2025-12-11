@@ -31,7 +31,7 @@ class CategoriesPage extends StatelessWidget {
         appBar: const MainAppBar(titleKey: 'Categories'),
         topChild: const DashboardTotalsOverview(),
         enableContentScroll: true,
-        topHeightRatio: 0.60,
+        useIntrinsicTopHeight: true,
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.horizontalMedium),
           child: Column(

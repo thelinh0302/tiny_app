@@ -96,7 +96,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
       value: _bloc,
       child: MainLayout(
         appBar: MainAppBar(titleKey: 'transaction', showBackButton: false),
-        topHeightRatio: 0.72,
+        useIntrinsicTopHeight: true,
         topChild: TransactionsTopSection(
           onFilterIncome: _onFilterIncome,
           onFilterExpense: _onFilterExpense,
