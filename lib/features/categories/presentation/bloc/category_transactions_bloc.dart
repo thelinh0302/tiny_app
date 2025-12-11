@@ -14,6 +14,7 @@ class CategoryTransactionsBloc
   String _period = 'day';
   int _pageSize = 20;
   bool _isLoadingMore = false;
+  String? _type;
 
   CategoryTransactionsBloc({required this.getTransactions})
     : super(const CategoryTransactionsState()) {
@@ -28,6 +29,7 @@ class CategoryTransactionsBloc
     _categoryId = event.categoryId;
     _period = event.period;
     _pageSize = event.pageSize;
+    _type = event.type;
 
     emit(
       state.copyWith(
@@ -46,6 +48,7 @@ class CategoryTransactionsBloc
         pageSize: _pageSize,
         period: _period,
         categoryId: _categoryId!,
+        type: _type,
       ),
     );
 
@@ -87,6 +90,7 @@ class CategoryTransactionsBloc
         pageSize: _pageSize,
         period: _period,
         categoryId: _categoryId!,
+        type: _type,
       ),
     );
 

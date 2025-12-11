@@ -20,6 +20,7 @@ class GetTransactions
       pageSize: params.pageSize,
       period: params.period,
       categoryId: params.categoryId,
+      type: params.type,
     );
   }
 }
@@ -29,14 +30,16 @@ class GetTransactionsParams extends Equatable {
   final int pageSize;
   final String period;
   final String categoryId;
+  final String? type; // 'income' | 'expense' | null
 
   const GetTransactionsParams({
     required this.page,
     required this.pageSize,
     required this.period,
     required this.categoryId,
+    this.type,
   });
 
   @override
-  List<Object?> get props => [page, pageSize, period, categoryId];
+  List<Object?> get props => [page, pageSize, period, categoryId, type];
 }

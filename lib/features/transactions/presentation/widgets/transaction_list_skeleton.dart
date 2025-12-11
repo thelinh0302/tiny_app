@@ -12,8 +12,11 @@ class TransactionListSkeleton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Skeletonizer(
       enabled: true,
-      child: Column(
-        children: List.generate(itemCount, (index) => _row(context)),
+      child: ListView.builder(
+        shrinkWrap: true,
+        physics: const ClampingScrollPhysics(),
+        itemCount: itemCount,
+        itemBuilder: (context, index) => _row(context),
       ),
     );
   }

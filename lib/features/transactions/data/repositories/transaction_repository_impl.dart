@@ -17,6 +17,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
     required int pageSize,
     required String period,
     required String categoryId,
+    String? type,
   }) async {
     try {
       final TransactionsPageResultModel res = await remote.getTransactions(
@@ -24,6 +25,7 @@ class TransactionRepositoryImpl implements TransactionRepository {
         pageSize: pageSize,
         period: period,
         categoryId: categoryId,
+        type: type,
       );
       return Right(res);
     } on ServerException catch (e) {

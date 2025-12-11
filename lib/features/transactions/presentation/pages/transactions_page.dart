@@ -9,6 +9,7 @@ import 'package:finly_app/core/widgets/transaction_list.dart';
 import 'package:finly_app/features/transactions/presentation/widgets/transaction_list_skeleton.dart';
 import 'package:finly_app/core/widgets/error_retry.dart';
 import 'package:finly_app/core/constants/app_spacing.dart';
+import 'package:finly_app/core/widgets/no_result_widget.dart';
 
 import 'package:finly_app/features/categories/presentation/bloc/category_transactions_bloc.dart';
 import 'package:finly_app/features/transactions/presentation/utils/transaction_mappers.dart';
@@ -24,6 +25,37 @@ class TransactionsPage extends StatefulWidget {
 class _TransactionsPageState extends State<TransactionsPage> {
   late final CategoryTransactionsBloc _bloc;
   final ScrollController _scrollController = ScrollController();
+  String? _typeFilter; // null = all, 'income' or 'expense'
+
+  void _onFilterIncome() {
+    final next = _typeFilter == 'income' ? null : 'income';
+    setState(() {
+      _typeFilter = next;
+    });
+    _bloc.add(
+      CategoryTransactionsRequested(
+        categoryId: '',
+        period: '',
+        pageSize: 20,
+        type: next,
+      ),
+    );
+  }
+
+  void _onFilterExpense() {
+    final next = _typeFilter == 'expense' ? null : 'expense';
+    setState(() {
+      _typeFilter = next;
+    });
+    _bloc.add(
+      CategoryTransactionsRequested(
+        categoryId: '',
+        period: '',
+        pageSize: 20,
+        type: next,
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -65,7 +97,11 @@ class _TransactionsPageState extends State<TransactionsPage> {
       child: MainLayout(
         appBar: MainAppBar(titleKey: 'transaction', showBackButton: false),
         topHeightRatio: 0.72,
-        topChild: const TransactionsTopSection(),
+        topChild: TransactionsTopSection(
+          onFilterIncome: _onFilterIncome,
+          onFilterExpense: _onFilterExpense,
+          selectedType: _typeFilter,
+        ),
         enableContentScroll: false,
         child: BlocBuilder<CategoryTransactionsBloc, CategoryTransactionsState>(
           builder: (context, state) {
@@ -90,6 +126,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
 
             final List<TransactionItemData> items =
                 state.items.map(mapTransactionToItemData).toList();
+
+            if (items.isEmpty) {
+              return const NoResultWidget();
+            }
 
             return Padding(
               padding: const EdgeInsets.symmetric(

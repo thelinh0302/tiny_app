@@ -8,6 +8,7 @@ abstract class TransactionRepository {
     required int pageSize,
     required String period,
     required String categoryId,
+    String? type,
   });
 
   Future<Either<Failure, bool>> createTransaction({

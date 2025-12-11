@@ -6,6 +6,7 @@ class AppColors {
   // Primary Colors
   static const Color mainGreen = Color(0xFF00B0B2);
   static const Color textPrimary = Color(0xFF00B0B2);
+  static const Color brandBlue = Color(0xFF0068FF);
 
   // Secondary Colors
   static const Color textSecondary = Color(0xFFFFFFFF);

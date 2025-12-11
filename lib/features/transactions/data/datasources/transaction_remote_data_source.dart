@@ -9,6 +9,7 @@ abstract class TransactionRemoteDataSource {
     required int pageSize,
     required String period,
     required String categoryId,
+    String? type,
   });
 
   Future<bool> createTransaction({
@@ -32,16 +33,21 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
     required int pageSize,
     required String period,
     required String categoryId,
+    String? type,
   }) async {
     try {
+      final Map<String, dynamic> query = {
+        'page': page,
+        'pageSize': pageSize,
+        'period': period,
+        'categoryId': categoryId,
+      };
+      if (type != null && type.isNotEmpty) {
+        query['type'] = type;
+      }
       final Response res = await client.get(
         '/transactions',
-        queryParameters: {
-          'page': page,
-          'pageSize': pageSize,
-          'period': period,
-          'categoryId': categoryId,
-        },
+        queryParameters: query,
       );
       return TransactionsPageResultModel.fromJson(
         res.data as Map<String, dynamic>,

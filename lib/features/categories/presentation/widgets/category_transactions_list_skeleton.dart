@@ -35,8 +35,8 @@ class CategoryTransactionsListSkeleton extends StatelessWidget {
           Container(
             height: AppSizes.avatarLarge,
             width: AppSizes.avatarLarge,
-            decoration: const BoxDecoration(
-              color: Colors.white,
+            decoration: BoxDecoration(
+              color: AppColors.mainGreen.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
           ),
