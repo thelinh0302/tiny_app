@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'package:finly_app/core/constants/app_images.dart';
 import 'package:finly_app/core/constants/app_spacing.dart';
 import 'package:finly_app/core/theme/app_colors.dart';
+import 'package:finly_app/features/categories/presentation/widgets/helpers/icon_widget.dart';
 
 class TransactionItemData {
   final String title;
@@ -65,11 +65,11 @@ class TransactionItem extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSpacing.radiusExtraLarge),
           ),
           child: Center(
-            child: AppImages.image(
+            child: buildCategoryIcon(
               data.iconAsset,
               width: 25,
               height: 25,
-              color: AppColors.white,
+              fit: BoxFit.contain,
             ),
           ),
         ),

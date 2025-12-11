@@ -1,65 +1,121 @@
 import 'package:finly_app/core/widgets/main_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:finly_app/core/constants/app_spacing.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+
 import 'package:finly_app/features/transactions/presentation/widgets/transactions_top_section.dart';
 import 'package:finly_app/core/widgets/main_layout.dart';
 import 'package:finly_app/core/widgets/transaction_list.dart';
-import 'package:finly_app/core/constants/app_images.dart';
+import 'package:finly_app/features/transactions/presentation/widgets/transaction_list_skeleton.dart';
+import 'package:finly_app/core/widgets/error_retry.dart';
+import 'package:finly_app/core/constants/app_spacing.dart';
+
+import 'package:finly_app/features/categories/presentation/bloc/category_transactions_bloc.dart';
+import 'package:finly_app/features/transactions/presentation/utils/transaction_mappers.dart';
 
 /// Transactions page defined under the Transactions feature.
-class TransactionsPage extends StatelessWidget {
+class TransactionsPage extends StatefulWidget {
   const TransactionsPage({super.key});
 
   @override
+  State<TransactionsPage> createState() => _TransactionsPageState();
+}
+
+class _TransactionsPageState extends State<TransactionsPage> {
+  late final CategoryTransactionsBloc _bloc;
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc = Modular.get<CategoryTransactionsBloc>();
+    _scrollController.addListener(_onScroll);
+    // Fetch the first page. Using empty period and an empty categoryId to fetch all if supported by API.
+    // Adjust categoryId accordingly if your API requires a specific value.
+    _bloc.add(
+      const CategoryTransactionsRequested(
+        categoryId: '',
+        period: '',
+        pageSize: 20,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    _bloc.close();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final max = _scrollController.position.maxScrollExtent;
+    final offset = _scrollController.offset;
+    if (offset >= max - 100) {
+      _bloc.add(CategoryTransactionsLoadMore());
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MainLayout(
-      appBar: MainAppBar(titleKey: 'transaction', showBackButton: false),
-      topHeightRatio: 0.82,
-      topChild: const TransactionsTopSection(),
-      enableContentScroll: true,
-      child: TransactionList(
-        items: const [
-          TransactionItemData(
-            title: 'Salary',
-            timeAndDate: '16:04 • 21 Sep 2025',
-            category: 'Income',
-            amount: '+ \$2,500.00',
-            isIncome: true,
-            iconAsset: AppImages.salary,
-          ),
-          TransactionItemData(
-            title: 'Groceries',
-            timeAndDate: '12:10 • 20 Sep 2025',
-            category: 'Food',
-            amount: '- \$87.40',
-            isIncome: false,
-            iconAsset: AppImages.food,
-          ),
-          TransactionItemData(
-            title: 'Car Insurance',
-            timeAndDate: '09:05 • 19 Sep 2025',
-            category: 'Auto',
-            amount: '- \$120.00',
-            isIncome: false,
-            iconAsset: AppImages.savingsCar,
-          ),
-          TransactionItemData(
-            title: 'Freelance',
-            timeAndDate: '18:22 • 17 Sep 2025',
-            category: 'Income',
-            amount: '+ \$610.00',
-            isIncome: true,
-            iconAsset: AppImages.income,
-          ),
-          TransactionItemData(
-            title: 'Electricity Bill',
-            timeAndDate: '08:10 • 15 Sep 2025',
-            category: 'Utilities',
-            amount: '- \$54.60',
-            isIncome: false,
-            iconAsset: AppImages.expense,
-          ),
-        ],
+    return BlocProvider.value(
+      value: _bloc,
+      child: MainLayout(
+        appBar: MainAppBar(titleKey: 'transaction', showBackButton: false),
+        topHeightRatio: 0.72,
+        topChild: const TransactionsTopSection(),
+        enableContentScroll: false,
+        child: BlocBuilder<CategoryTransactionsBloc, CategoryTransactionsState>(
+          builder: (context, state) {
+            if (state.status == CategoryTxStatus.loading &&
+                state.items.isEmpty) {
+              return const TransactionListSkeleton(itemCount: 8);
+            }
+            if (state.status == CategoryTxStatus.failure) {
+              return ErrorRetry(
+                message: state.errorMessage ?? 'Failed to load transactions',
+                onRetry: () {
+                  _bloc.add(
+                    const CategoryTransactionsRequested(
+                      categoryId: '',
+                      period: '',
+                      pageSize: 20,
+                    ),
+                  );
+                },
+              );
+            }
+
+            final List<TransactionItemData> items =
+                state.items.map(mapTransactionToItemData).toList();
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.horizontalMedium,
+                vertical: AppSpacing.verticalSmall,
+              ),
+              child: CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  SliverToBoxAdapter(child: TransactionList(items: items)),
+                  SliverToBoxAdapter(
+                    child: Visibility(
+                      visible:
+                          state.status == CategoryTxStatus.loadingMore &&
+                          !state.hasReachedEnd,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.0),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
