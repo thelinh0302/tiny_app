@@ -88,13 +88,15 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
     _from = widget.initialFrom;
     _to = widget.initialTo;
 
-    if (_from != null) _fromCtrl.text = _formatYmd(_from!);
-    if (_to != null) _toCtrl.text = _formatYmd(_to!);
+    if (_from != null) _fromCtrl.text = _formatDdMmYyyy(_from!);
+    if (_to != null) _toCtrl.text = _formatDdMmYyyy(_to!);
 
     // Initialize quick type if provided by caller (keeps last selection across opens)
     _selectedQuick = widget.initialQuickType;
-    // Separate modes: do NOT auto-infer quick type from initial dates
-    // so that range and quick type remain independent.
+    // When a quick type is provided, just highlight it; keep date fields editable and empty.
+    // Manual date selection will clear the quick type.
+    // Separate modes: do NOT auto-infer quick type from initial dates so that
+    // range and quick type remain independent.
   }
 
   @override
@@ -104,17 +106,44 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
     super.dispose();
   }
 
-  // yyyy-MM-dd formatter (consistent with DateTextField default)
-  String _formatYmd(DateTime d) {
-    final y = d.year.toString().padLeft(4, '0');
-    final m = d.month.toString().padLeft(2, '0');
-    final day = d.day.toString().padLeft(2, '0');
-    return "$y-$m-$day";
+  // dd-MM-yyyy formatter for display in date fields
+  String _formatDdMmYyyy(DateTime d) {
+    final dd = d.day.toString().padLeft(2, '0');
+    final mm = d.month.toString().padLeft(2, '0');
+    final yyyy = d.year.toString().padLeft(4, '0');
+    return "$dd-$mm-$yyyy";
   }
 
   DateTime _startOfDay(DateTime d) => DateTime(d.year, d.month, d.day);
   DateTime _endOfDay(DateTime d) =>
       DateTime(d.year, d.month, d.day, 23, 59, 59, 999);
+
+  DateTime _startOfWeek(DateTime d) {
+    final int w = d.weekday; // Monday=1 ... Sunday=7
+    final DateTime s = DateTime(
+      d.year,
+      d.month,
+      d.day,
+    ).subtract(Duration(days: w - 1));
+    return _startOfDay(s);
+  }
+
+  DateTime _endOfWeek(DateTime d) {
+    final DateTime s = _startOfWeek(d);
+    final DateTime e = s.add(const Duration(days: 6));
+    return _endOfDay(e);
+  }
+
+  DateTime _startOfMonth(DateTime d) => DateTime(d.year, d.month, 1);
+
+  DateTime _endOfMonth(DateTime d) {
+    final DateTime firstNextMonth =
+        (d.month == 12)
+            ? DateTime(d.year + 1, 1, 1)
+            : DateTime(d.year, d.month + 1, 1);
+    final DateTime lastDay = firstNextMonth.subtract(const Duration(days: 1));
+    return _endOfDay(lastDay);
+  }
 
   void _applyQuick(FilterQuickType range) {
     setState(() {
@@ -123,12 +152,12 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
         _selectedQuick = null;
       } else {
         _selectedQuick = range;
-        // In quick mode, clear any manual date range and disable date fields
-        _from = null;
-        _to = null;
-        _fromCtrl.clear();
-        _toCtrl.clear();
       }
+      // In quick mode, do not auto-fill date fields; keep them empty and editable
+      _from = null;
+      _to = null;
+      _fromCtrl.clear();
+      _toCtrl.clear();
     });
   }
 
@@ -205,7 +234,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             AppSpacing.verticalSpaceLarge,
 
             IgnorePointer(
-              ignoring: _selectedQuick != null,
+              ignoring: false,
               child: Opacity(
                 opacity: _selectedQuick != null ? 0.5 : 1.0,
                 child: Row(
@@ -219,6 +248,12 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                           const Duration(days: 3650),
                         ),
                         initialDate: _from,
+                        dateFormatter: (d) {
+                          final dd = d.day.toString().padLeft(2, '0');
+                          final mm = d.month.toString().padLeft(2, '0');
+                          final yyyy = d.year.toString().padLeft(4, '0');
+                          return "$dd-$mm-$yyyy";
+                        },
                         onDateChanged: _onFromChanged,
                       ),
                     ),
@@ -232,6 +267,12 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
                           const Duration(days: 3650),
                         ),
                         initialDate: _to,
+                        dateFormatter: (d) {
+                          final dd = d.day.toString().padLeft(2, '0');
+                          final mm = d.month.toString().padLeft(2, '0');
+                          final yyyy = d.year.toString().padLeft(4, '0');
+                          return "$dd-$mm-$yyyy";
+                        },
                         onDateChanged: _onToChanged,
                       ),
                     ),
@@ -243,7 +284,7 @@ class _FilterBottomSheetContentState extends State<_FilterBottomSheetContent> {
             _QuickButtons(
               selected: _selectedQuick,
               onSelected: _applyQuick,
-              isDisabled: _from != null || _to != null,
+              isDisabled: false,
             ),
 
             const Spacer(),

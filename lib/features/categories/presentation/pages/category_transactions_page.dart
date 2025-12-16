@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:finly_app/core/widgets/filter_header.dart';
 import 'package:finly_app/core/widgets/filter_bottom_sheet.dart'
     show DateRangeFilter, FilterQuickType;
+import 'package:finly_app/core/utils/transaction_filters.dart';
 
 import 'package:finly_app/core/constants/app_spacing.dart';
 import 'package:finly_app/core/widgets/dashboard_totals_overview.dart';
@@ -68,59 +69,23 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
     }
   }
 
-  String _formatYmd(DateTime d) {
-    final y = d.year.toString().padLeft(4, '0');
-    final m = d.month.toString().padLeft(2, '0');
-    final day = d.day.toString().padLeft(2, '0');
-    return "$y-$m-$day";
-  }
-
   void _onApplyFilter(DateRangeFilter res) {
-    String period = '';
-    String? dateStart;
-    String? dateEnd;
+    final result = buildFilterApplyResult(res);
 
-    if (res.isQuick) {
-      // Persist quick selection and clear manual range
-      _lastQuick = res.quickType;
-      _lastFrom = null;
-      _lastTo = null;
-
-      switch (res.quickType) {
-        case FilterQuickType.today:
-          period = 'daily';
-          break;
-        case FilterQuickType.thisWeek:
-          period = 'week';
-          break;
-        case FilterQuickType.thisMonth:
-          period = 'month';
-          break;
-        default:
-          period = '';
-      }
-    } else {
-      // Persist manual range and clear quick selection
-      _lastQuick = null;
-      _lastFrom = res.from;
-      _lastTo = res.to;
-
-      if (res.from != null && res.to != null) {
-        dateStart = _formatYmd(res.from!);
-        dateEnd = _formatYmd(res.to!);
-        period = '';
-      } else {
-        period = '';
-      }
-    }
+    // Persist selection into state for bottom sheet defaults
+    setState(() {
+      _lastQuick = result.lastQuick;
+      _lastFrom = result.lastFrom;
+      _lastTo = result.lastTo;
+    });
 
     _bloc.add(
       CategoryTransactionsRequested(
         categoryId: widget.category.id,
-        period: period,
+        period: result.period,
         pageSize: 20,
-        dateStart: dateStart,
-        dateEnd: dateEnd,
+        dateStart: result.dateStart,
+        dateEnd: result.dateEnd,
       ),
     );
   }
