@@ -12,16 +12,27 @@ class CategoryTransactionsRequested extends CategoryTransactionsEvent {
   final String period;
   final int pageSize;
   final String? type;
+  final String? dateStart; // yyyy-MM-dd
+  final String? dateEnd; // yyyy-MM-dd
 
   const CategoryTransactionsRequested({
     required this.categoryId,
     this.period = 'day',
     this.pageSize = 20,
     this.type,
+    this.dateStart,
+    this.dateEnd,
   });
 
   @override
-  List<Object?> get props => [categoryId, period, pageSize, type];
+  List<Object?> get props => [
+    categoryId,
+    period,
+    pageSize,
+    type,
+    dateStart,
+    dateEnd,
+  ];
 }
 
 class CategoryTransactionsLoadMore extends CategoryTransactionsEvent {}

@@ -9,6 +9,8 @@ abstract class TransactionRepository {
     required String period,
     required String categoryId,
     String? type,
+    String? dateStart,
+    String? dateEnd,
   });
 
   Future<Either<Failure, bool>> createTransaction({

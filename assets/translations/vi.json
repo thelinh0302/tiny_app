@@ -172,5 +172,25 @@
   "Hi, Welcome Back": "Xin chào, chào mừng trở lại",
   "add": "Thêm",
   "save": "Lưu",
-  "add_category": "Thêm danh mục"
+  "add_category": "Thêm danh mục",
+  "transactions": {
+    "title": "Giao dịch của bạn"
+  },
+  "filter": {
+    "title": "Bộ lọc",
+    "quick": {
+      "title": "Lọc nhanh",
+      "today": "Hôm nay",
+      "thisWeek": "Tuần này",
+      "thisMonth": "Tháng này"
+    },
+    "dateRange": "Khoảng ngày",
+    "from": "Từ ngày",
+    "to": "Đến ngày",
+    "resetAll": "Đặt lại tất cả",
+    "apply": "Áp dụng bộ lọc",
+    "errors": {
+      "fromAfterTo": "Ngày bắt đầu không được sau ngày kết thúc"
+    }
+  }
 }

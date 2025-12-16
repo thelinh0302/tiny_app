@@ -10,6 +10,8 @@ abstract class TransactionRemoteDataSource {
     required String period,
     required String categoryId,
     String? type,
+    String? dateStart,
+    String? dateEnd,
   });
 
   Future<bool> createTransaction({
@@ -34,6 +36,8 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
     required String period,
     required String categoryId,
     String? type,
+    String? dateStart,
+    String? dateEnd,
   }) async {
     try {
       final Map<String, dynamic> query = {
@@ -45,6 +49,13 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
       if (type != null && type.isNotEmpty) {
         query['type'] = type;
       }
+      if (dateStart != null && dateStart.isNotEmpty) {
+        query['dateStart'] = dateStart;
+      }
+      if (dateEnd != null && dateEnd.isNotEmpty) {
+        query['dateEnd'] = dateEnd;
+      }
+
       final Response res = await client.get(
         '/transactions',
         queryParameters: query,

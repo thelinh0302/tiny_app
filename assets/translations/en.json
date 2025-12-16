@@ -183,5 +183,25 @@
   "Hi, Welcome Back": "Hi, Welcome Back",
   "add": "Add",
   "save": "Save",
-  "add_category": "Add category"
+  "add_category": "Add category",
+  "transactions": {
+    "title": "Your transactions"
+  },
+  "filter": {
+    "title": "Filter",
+    "quick": {
+      "title": "Quick filters",
+      "today": "Today",
+      "thisWeek": "This week",
+      "thisMonth": "This month"
+    },
+    "dateRange": "Date range",
+    "from": "From",
+    "to": "To",
+    "resetAll": "Reset All",
+    "apply": "Apply Filter",
+    "errors": {
+      "fromAfterTo": "From date must not be after To date"
+    }
+  }
 }

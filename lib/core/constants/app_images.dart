@@ -35,6 +35,7 @@ class AppImages {
 
   // UI icons
   static const String notification = '$_base/noti_icon.svg';
+  static const String filter = '$_base/filter_icon.svg';
 
   // Illustrations
   static const String noResult = '$_base/no_result.svg';

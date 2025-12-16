@@ -21,6 +21,8 @@ class GetTransactions
       period: params.period,
       categoryId: params.categoryId,
       type: params.type,
+      dateStart: params.dateStart,
+      dateEnd: params.dateEnd,
     );
   }
 }
@@ -31,6 +33,8 @@ class GetTransactionsParams extends Equatable {
   final String period;
   final String categoryId;
   final String? type; // 'income' | 'expense' | null
+  final String? dateStart; // yyyy-MM-dd
+  final String? dateEnd; // yyyy-MM-dd
 
   const GetTransactionsParams({
     required this.page,
@@ -38,8 +42,18 @@ class GetTransactionsParams extends Equatable {
     required this.period,
     required this.categoryId,
     this.type,
+    this.dateStart,
+    this.dateEnd,
   });
 
   @override
-  List<Object?> get props => [page, pageSize, period, categoryId, type];
+  List<Object?> get props => [
+    page,
+    pageSize,
+    period,
+    categoryId,
+    type,
+    dateStart,
+    dateEnd,
+  ];
 }

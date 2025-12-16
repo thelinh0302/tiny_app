@@ -18,6 +18,8 @@ class TransactionRepositoryImpl implements TransactionRepository {
     required String period,
     required String categoryId,
     String? type,
+    String? dateStart,
+    String? dateEnd,
   }) async {
     try {
       final TransactionsPageResultModel res = await remote.getTransactions(
@@ -26,6 +28,8 @@ class TransactionRepositoryImpl implements TransactionRepository {
         period: period,
         categoryId: categoryId,
         type: type,
+        dateStart: dateStart,
+        dateEnd: dateEnd,
       );
       return Right(res);
     } on ServerException catch (e) {

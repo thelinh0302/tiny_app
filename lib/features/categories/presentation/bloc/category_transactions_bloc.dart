@@ -12,6 +12,8 @@ class CategoryTransactionsBloc
 
   String? _categoryId;
   String _period = 'day';
+  String? _dateStart;
+  String? _dateEnd;
   int _pageSize = 20;
   bool _isLoadingMore = false;
   String? _type;
@@ -30,6 +32,8 @@ class CategoryTransactionsBloc
     _period = event.period;
     _pageSize = event.pageSize;
     _type = event.type;
+    _dateStart = event.dateStart;
+    _dateEnd = event.dateEnd;
 
     emit(
       state.copyWith(
@@ -49,6 +53,8 @@ class CategoryTransactionsBloc
         period: _period,
         categoryId: _categoryId!,
         type: _type,
+        dateStart: _dateStart,
+        dateEnd: _dateEnd,
       ),
     );
 
@@ -91,6 +97,8 @@ class CategoryTransactionsBloc
         period: _period,
         categoryId: _categoryId!,
         type: _type,
+        dateStart: _dateStart,
+        dateEnd: _dateEnd,
       ),
     );
 
