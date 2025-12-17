@@ -7,6 +7,13 @@ abstract class CategoryTransactionsEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class CategoryTransactionRemoved extends CategoryTransactionsEvent {
+  final String id;
+  const CategoryTransactionRemoved(this.id);
+  @override
+  List<Object?> get props => [id];
+}
+
 class CategoryTransactionsRequested extends CategoryTransactionsEvent {
   final String categoryId;
   final String period;

@@ -18,6 +18,8 @@ import 'package:finly_app/core/widgets/filter_bottom_sheet.dart'
 import 'package:finly_app/features/categories/presentation/bloc/category_transactions_bloc.dart';
 import 'package:finly_app/features/transactions/presentation/utils/transaction_mappers.dart';
 import 'package:finly_app/core/utils/transaction_filters.dart';
+import 'package:finly_app/features/transactions/presentation/bloc/delete_transaction_bloc.dart';
+import 'package:finly_app/core/widgets/app_alert.dart';
 
 /// Transactions page defined under the Transactions feature.
 class TransactionsPage extends StatefulWidget {
@@ -29,6 +31,7 @@ class TransactionsPage extends StatefulWidget {
 
 class _TransactionsPageState extends State<TransactionsPage> {
   late final CategoryTransactionsBloc _bloc;
+  late final DeleteTransactionBloc _deleteBloc;
   final ScrollController _scrollController = ScrollController();
   String? _typeFilter; // null = all, 'income' or 'expense'
 
@@ -71,6 +74,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
   void initState() {
     super.initState();
     _bloc = Modular.get<CategoryTransactionsBloc>();
+    _deleteBloc = Modular.get<DeleteTransactionBloc>();
     _scrollController.addListener(_onScroll);
     // Fetch the first page. Using empty period and an empty categoryId to fetch all if supported by API.
     // Adjust categoryId accordingly if your API requires a specific value.
@@ -88,6 +92,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _bloc.close();
+    _deleteBloc.close();
     super.dispose();
   }
 
@@ -120,6 +125,44 @@ class _TransactionsPageState extends State<TransactionsPage> {
         dateEnd: result.dateEnd,
       ),
     );
+  }
+
+  Future<void> _onDeleteTransaction(TransactionItemData item) async {
+    final bool? ok = await AppAlert.confirmAsync(
+      context,
+      title: 'transactions.delete.title'.tr(),
+      message: 'transactions.delete.confirm'.tr(),
+      confirmText: 'common.delete'.tr(namedArgs: {}, args: []),
+      cancelText: 'common.cancel'.tr(namedArgs: {}, args: []),
+      onConfirm: () async {
+        _deleteBloc.add(DeleteTransactionRequested(item.id));
+        final result = await _deleteBloc.stream.firstWhere(
+          (s) =>
+              s.status == DeleteTxnStatus.success ||
+              s.status == DeleteTxnStatus.failure,
+        );
+        return result.status == DeleteTxnStatus.success;
+      },
+    );
+
+    if (ok == true) {
+      _bloc.add(CategoryTransactionRemoved(item.id));
+      if (mounted) {
+        await AppAlert.success(
+          context,
+          'transactions.delete.success'.tr(),
+          title: 'common.success'.tr(),
+        );
+      }
+    } else if (ok == false) {
+      if (mounted) {
+        await AppAlert.error(
+          context,
+          'transactions.delete.error'.tr(),
+          title: 'common.error'.tr(),
+        );
+      }
+    }
   }
 
   @override
@@ -188,7 +231,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
                       controller: _scrollController,
                       slivers: [
                         SliverToBoxAdapter(
-                          child: TransactionList(items: items),
+                          child: TransactionList(
+                            items: items,
+                            onDelete: _onDeleteTransaction,
+                          ),
                         ),
                         SliverToBoxAdapter(
                           child: Visibility(

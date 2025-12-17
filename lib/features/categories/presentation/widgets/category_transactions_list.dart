@@ -12,11 +12,13 @@ import 'package:finly_app/core/widgets/no_result_widget.dart';
 class CategoryTransactionsList extends StatelessWidget {
   final List<CategoryTransaction> transactions;
   final VoidCallback onAddExpense;
+  final ValueChanged<CategoryTransaction>? onDelete;
 
   const CategoryTransactionsList({
     super.key,
     required this.transactions,
     required this.onAddExpense,
+    this.onDelete,
   });
 
   @override
@@ -69,6 +71,7 @@ class CategoryTransactionsList extends StatelessWidget {
             amount: t.amount,
             isExpense: t.isExpense,
             iconAsset: t.iconAsset,
+            onDelete: onDelete == null ? null : () => onDelete!(t),
           ),
         ),
       );

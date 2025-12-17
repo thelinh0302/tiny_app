@@ -184,8 +184,22 @@
   "add": "Add",
   "save": "Save",
   "add_category": "Add category",
+  "common": {
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "success": "Success",
+    "error": "Error",
+    "pleaseWait": "Please wait",
+    "processing": "Processing..."
+  },
   "transactions": {
-    "title": "Your transactions"
+    "title": "Your transactions",
+    "delete": {
+      "title": "Delete transaction",
+      "confirm": "Are you sure you want to delete this transaction?",
+      "success": "Transaction deleted",
+      "error": "Failed to delete"
+    }
   },
   "filter": {
     "title": "Filter",

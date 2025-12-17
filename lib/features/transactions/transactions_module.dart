@@ -6,6 +6,8 @@ import 'package:finly_app/features/transactions/data/datasources/transaction_rem
 import 'package:finly_app/features/transactions/data/repositories/transaction_repository_impl.dart';
 import 'package:finly_app/features/transactions/domain/repositories/transaction_repository.dart';
 import 'package:finly_app/features/transactions/domain/usecases/get_transactions.dart';
+import 'package:finly_app/features/transactions/domain/usecases/delete_transaction.dart';
+import 'package:finly_app/features/transactions/presentation/bloc/delete_transaction_bloc.dart';
 import 'package:finly_app/features/transactions/presentation/pages/transactions_page.dart';
 
 /// Transactions feature module.
@@ -24,6 +26,13 @@ class TransactionsModule extends Module {
     );
     i.addLazySingleton<GetTransactions>(
       () => GetTransactions(i.get<TransactionRepository>()),
+    );
+    i.addLazySingleton<DeleteTransaction>(
+      () => DeleteTransaction(i.get<TransactionRepository>()),
+    );
+    i.add<DeleteTransactionBloc>(
+      () =>
+          DeleteTransactionBloc(deleteTransaction: i.get<DeleteTransaction>()),
     );
     i.add<CategoryTransactionsBloc>(
       () => CategoryTransactionsBloc(getTransactions: i.get<GetTransactions>()),

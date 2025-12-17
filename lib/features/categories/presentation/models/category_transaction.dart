@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 /// Contains enough data to render TransactionItem and to group by month-year.
 @immutable
 class CategoryTransaction {
+  final String id;
   final String title;
   final DateTime dateTime;
   final double amount;
@@ -11,6 +12,7 @@ class CategoryTransaction {
   final String iconAsset;
 
   const CategoryTransaction({
+    required this.id,
     required this.title,
     required this.dateTime,
     required this.amount,

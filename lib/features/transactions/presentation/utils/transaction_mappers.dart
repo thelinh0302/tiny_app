@@ -18,6 +18,7 @@ TransactionItemData mapTransactionToItemData(TransactionEntity e) {
           : (isIncome ? AppImages.income : AppImages.expense);
 
   return TransactionItemData(
+    id: e.id,
     title: e.name,
     timeAndDate: timeStr,
     category: e.category.name,

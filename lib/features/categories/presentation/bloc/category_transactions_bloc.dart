@@ -22,6 +22,7 @@ class CategoryTransactionsBloc
     : super(const CategoryTransactionsState()) {
     on<CategoryTransactionsRequested>(_onRequested);
     on<CategoryTransactionsLoadMore>(_onLoadMore);
+    on<CategoryTransactionRemoved>(_onRemoved);
   }
 
   Future<void> _onRequested(
@@ -75,6 +76,14 @@ class CategoryTransactionsBloc
         ),
       ),
     );
+  }
+
+  Future<void> _onRemoved(
+    CategoryTransactionRemoved event,
+    Emitter<CategoryTransactionsState> emit,
+  ) async {
+    final filtered = state.items.where((e) => e.id != event.id).toList();
+    emit(state.copyWith(items: filtered));
   }
 
   Future<void> _onLoadMore(

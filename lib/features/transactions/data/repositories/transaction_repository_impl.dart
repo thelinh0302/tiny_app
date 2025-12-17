@@ -12,6 +12,18 @@ class TransactionRepositoryImpl implements TransactionRepository {
   TransactionRepositoryImpl({required this.remote});
 
   @override
+  Future<Either<Failure, bool>> deleteTransaction({required String id}) async {
+    try {
+      final bool success = await remote.deleteTransaction(id: id);
+      return Right(success);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return const Left(ServerFailure('Unknown error'));
+    }
+  }
+
+  @override
   Future<Either<Failure, TransactionsPageResult>> getTransactions({
     required int page,
     required int pageSize,

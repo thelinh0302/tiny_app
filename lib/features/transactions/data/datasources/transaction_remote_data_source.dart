@@ -22,6 +22,8 @@ abstract class TransactionRemoteDataSource {
     String? note,
     String? attachmentUrl,
   });
+
+  Future<bool> deleteTransaction({required String id});
 }
 
 class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
@@ -106,6 +108,19 @@ class TransactionRemoteDataSourceImpl implements TransactionRemoteDataSource {
       return (data['success'] as bool?) ?? false;
     } on DioException catch (e) {
       throw ServerException(e.message ?? 'Failed to create transaction');
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<bool> deleteTransaction({required String id}) async {
+    try {
+      final Response res = await client.delete('/transactions/$id');
+      final data = res.data as Map<String, dynamic>;
+      return (data['success'] as bool?) ?? false;
+    } on DioException catch (e) {
+      throw ServerException(e.message ?? 'Failed to delete transaction');
     } catch (e) {
       throw ServerException(e.toString());
     }

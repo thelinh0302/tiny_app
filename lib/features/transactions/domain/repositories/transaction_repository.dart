@@ -21,4 +21,6 @@ abstract class TransactionRepository {
     String? note,
     String? attachmentUrl,
   });
+
+  Future<Either<Failure, bool>> deleteTransaction({required String id});
 }

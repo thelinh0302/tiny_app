@@ -6,6 +6,8 @@ import 'package:finly_app/core/widgets/filter_header.dart';
 import 'package:finly_app/core/widgets/filter_bottom_sheet.dart'
     show DateRangeFilter, FilterQuickType;
 import 'package:finly_app/core/utils/transaction_filters.dart';
+import 'package:finly_app/core/widgets/app_alert.dart';
+import 'package:finly_app/features/transactions/presentation/bloc/delete_transaction_bloc.dart';
 
 import 'package:finly_app/core/constants/app_spacing.dart';
 import 'package:finly_app/core/widgets/dashboard_totals_overview.dart';
@@ -90,6 +92,45 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
     );
   }
 
+  Future<void> _onDeleteCategoryTransaction(CategoryTransaction ct) async {
+    final bool? ok = await AppAlert.confirmAsync(
+      context,
+      title: 'transactions.delete.title'.tr(),
+      message: 'transactions.delete.confirm'.tr(),
+      confirmText: 'common.delete'.tr(),
+      cancelText: 'common.cancel'.tr(),
+      onConfirm: () async {
+        final deleteBloc = Modular.get<DeleteTransactionBloc>();
+        deleteBloc.add(DeleteTransactionRequested(ct.id));
+        final result = await deleteBloc.stream.firstWhere(
+          (s) =>
+              s.status == DeleteTxnStatus.success ||
+              s.status == DeleteTxnStatus.failure,
+        );
+        return result.status == DeleteTxnStatus.success;
+      },
+    );
+
+    if (ok == true) {
+      _bloc.add(CategoryTransactionRemoved(ct.id));
+      if (mounted) {
+        await AppAlert.success(
+          context,
+          'transactions.delete.success'.tr(),
+          title: 'common.success'.tr(),
+        );
+      }
+    } else if (ok == false) {
+      if (mounted) {
+        await AppAlert.error(
+          context,
+          'transactions.delete.error'.tr(),
+          title: 'common.error'.tr(),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider.value(
@@ -145,6 +186,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
                         state.items
                             .map(
                               (e) => CategoryTransaction(
+                                id: e.id,
                                 title: e.name,
                                 dateTime: e.date,
                                 amount: e.amount,
@@ -162,6 +204,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
                         SliverToBoxAdapter(
                           child: CategoryTransactionsList(
                             transactions: mapped,
+                            onDelete: _onDeleteCategoryTransaction,
                             onAddExpense: () async {
                               final result = await Modular.to.pushNamed(
                                 '/dashboard/category/add-expense',

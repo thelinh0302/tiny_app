@@ -173,8 +173,22 @@
   "add": "Thêm",
   "save": "Lưu",
   "add_category": "Thêm danh mục",
+  "common": {
+    "delete": "Xóa",
+    "cancel": "Hủy",
+    "success": "Thành công",
+    "error": "Lỗi",
+    "pleaseWait": "Vui lòng đợi",
+    "processing": "Đang xử lý..."
+  },
   "transactions": {
-    "title": "Giao dịch của bạn"
+    "title": "Giao dịch của bạn",
+    "delete": {
+      "title": "Xóa giao dịch",
+      "confirm": "Bạn có chắc muốn xóa giao dịch này không?",
+      "success": "Đã xóa giao dịch",
+      "error": "Xóa giao dịch thất bại"
+    }
   },
   "filter": {
     "title": "Bộ lọc",
