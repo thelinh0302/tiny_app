@@ -2,22 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:finly_app/core/widgets/filter_header.dart';
-import 'package:finly_app/core/widgets/filter_bottom_sheet.dart'
-    show DateRangeFilter, FilterQuickType;
-import 'package:finly_app/core/utils/transaction_filters.dart';
-import 'package:finly_app/core/widgets/app_alert.dart';
-import 'package:finly_app/features/transactions/presentation/bloc/delete_transaction_bloc.dart';
 
 import 'package:finly_app/core/constants/app_spacing.dart';
+import 'package:finly_app/core/widgets/app_alert.dart';
 import 'package:finly_app/core/widgets/dashboard_totals_overview.dart';
+import 'package:finly_app/core/widgets/filter_bottom_sheet.dart'
+    show DateRangeFilter, FilterQuickType;
+import 'package:finly_app/core/widgets/filter_header.dart';
 import 'package:finly_app/core/widgets/main_app_bar.dart';
 import 'package:finly_app/core/widgets/main_layout.dart';
-import 'package:finly_app/features/categories/presentation/widgets/category_card.dart';
-import 'package:finly_app/features/categories/presentation/models/category_transaction.dart';
-import 'package:finly_app/features/categories/presentation/widgets/category_transactions_list.dart';
+import 'package:finly_app/core/utils/transaction_filters.dart';
+import 'package:finly_app/features/analytics/presentation/bloc/analytics_summary_bloc.dart';
 import 'package:finly_app/features/categories/presentation/bloc/category_transactions_bloc.dart';
+import 'package:finly_app/features/categories/presentation/models/category_transaction.dart';
+import 'package:finly_app/features/categories/presentation/widgets/category_card.dart';
+import 'package:finly_app/features/categories/presentation/widgets/category_transactions_list.dart';
 import 'package:finly_app/features/categories/presentation/widgets/category_transactions_list_skeleton.dart';
+import 'package:finly_app/features/transactions/presentation/bloc/delete_transaction_bloc.dart';
 
 /// Transactions screen for a selected Category.
 /// Uses MainLayout and the reusable TransactionItem widget.
@@ -34,6 +35,7 @@ class CategoryTransactionsPage extends StatefulWidget {
 class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
   final ScrollController _scrollController = ScrollController();
   late final CategoryTransactionsBloc _bloc;
+  late final AnalyticsSummaryBloc _summaryBloc;
 
   // Persist last filter selection to prefill bottom sheet
   FilterQuickType? _lastQuick;
@@ -44,6 +46,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
   void initState() {
     super.initState();
     _bloc = Modular.get<CategoryTransactionsBloc>();
+    _summaryBloc = Modular.get<AnalyticsSummaryBloc>();
     _scrollController.addListener(_onScroll);
     _bloc.add(
       CategoryTransactionsRequested(
@@ -52,6 +55,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
         pageSize: 20,
       ),
     );
+    _summaryBloc.add(const AnalyticsSummaryRequested());
   }
 
   @override
@@ -59,6 +63,7 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     _bloc.close();
+    _summaryBloc.close();
     super.dispose();
   }
 
@@ -90,6 +95,18 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
         dateEnd: result.dateEnd,
       ),
     );
+
+    // Compute analytics date range via shared helper and dispatch
+    final AnalyticsDateRange ar = buildAnalyticsDateRange(res, result);
+    if (mounted) {
+      _summaryBloc.add(
+        AnalyticsSummaryRequested(
+          all: ar.startDate == null || ar.endDate == null,
+          startDate: ar.startDate,
+          endDate: ar.endDate,
+        ),
+      );
+    }
   }
 
   Future<void> _onDeleteCategoryTransaction(CategoryTransaction ct) async {
@@ -133,16 +150,44 @@ class _CategoryTransactionsPageState extends State<CategoryTransactionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _bloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: _bloc),
+        BlocProvider.value(value: _summaryBloc),
+      ],
       child: MainLayout(
         appBar: MainAppBar(titleKey: widget.category.title),
-        topChild: const DashboardTotalsOverview(
-          totalBalanceAmount: '5,200.00',
-          totalExpenseAmount: '1,250.00',
-          progress: 0.35,
-          progressAmountText: '7,783.00',
-          subtitleText: '35% of your expenses, looks good.',
+        topChild: BlocBuilder<AnalyticsSummaryBloc, AnalyticsSummaryState>(
+          builder: (context, state) {
+            if (state is AnalyticsSummaryLoadInProgress ||
+                state is AnalyticsSummaryInitial) {
+              return const DashboardTotalsOverview();
+            }
+            if (state is AnalyticsSummaryLoadFailure) {
+              return const DashboardTotalsOverview();
+            }
+            if (state is AnalyticsSummaryLoadSuccess) {
+              final s = state.summary;
+              final balanceText = '\$' + s.balance.toStringAsFixed(2);
+              final expenseText = '\$' + s.expenseTotal.toStringAsFixed(2);
+
+              double progress = 0.0;
+              final denominator = (s.incomeTotal + s.expenseTotal);
+              if (denominator > 0) {
+                progress = (s.expenseTotal / denominator).clamp(0, 1);
+              }
+
+              return DashboardTotalsOverview(
+                totalBalanceTitle: 'Total Balance',
+                totalBalanceAmount: balanceText,
+                totalExpenseTitle: 'Total Expense',
+                totalExpenseAmount: expenseText,
+                progress: progress,
+                progressAmountText: expenseText,
+              );
+            }
+            return const DashboardTotalsOverview();
+          },
         ),
         useIntrinsicTopHeight: true,
         enableContentScroll: false,

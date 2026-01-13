@@ -7,6 +7,7 @@ import 'package:finly_app/core/theme/app_colors.dart';
 import 'package:finly_app/core/constants/app_images.dart';
 import 'package:finly_app/core/widgets/main_layout.dart';
 import 'package:finly_app/core/widgets/dashboard_totals_overview.dart';
+import 'package:finly_app/features/analytics/presentation/bloc/analytics_summary_bloc.dart';
 import 'package:finly_app/core/widgets/main_app_bar.dart';
 import 'package:finly_app/features/categories/presentation/widgets/categories_grid.dart';
 import 'package:finly_app/features/categories/presentation/widgets/category_card.dart';
@@ -29,7 +30,47 @@ class CategoriesPage extends StatelessWidget {
                 ..add(const CategoryListRequested(page: 1, pageSize: 20)),
       child: MainLayout(
         appBar: const MainAppBar(titleKey: 'Categories'),
-        topChild: const DashboardTotalsOverview(),
+        topChild: BlocProvider<AnalyticsSummaryBloc>(
+          create:
+              (_) =>
+                  Modular.get<AnalyticsSummaryBloc>()
+                    ..add(const AnalyticsSummaryRequested()),
+          child: BlocBuilder<AnalyticsSummaryBloc, AnalyticsSummaryState>(
+            builder: (context, state) {
+              if (state is AnalyticsSummaryLoadInProgress ||
+                  state is AnalyticsSummaryInitial) {
+                return const DashboardTotalsOverview();
+              }
+              if (state is AnalyticsSummaryLoadFailure) {
+                // Fallback to zeros; could render an error banner if desired
+                return const DashboardTotalsOverview();
+              }
+              if (state is AnalyticsSummaryLoadSuccess) {
+                final s = state.summary;
+                // Using intl directly for clarity in display
+                final balanceText = '\$' + s.balance.toStringAsFixed(2);
+                final expenseText = '\$' + s.expenseTotal.toStringAsFixed(2);
+
+                // Progress bar: expense vs income (avoid divide-by-zero)
+                double progress = 0.0;
+                final denominator = (s.incomeTotal + s.expenseTotal);
+                if (denominator > 0) {
+                  progress = (s.expenseTotal / denominator).clamp(0, 1);
+                }
+
+                return DashboardTotalsOverview(
+                  totalBalanceTitle: 'Total Balance',
+                  totalBalanceAmount: balanceText,
+                  totalExpenseTitle: 'Total Expense',
+                  totalExpenseAmount: expenseText,
+                  progress: progress,
+                  progressAmountText: expenseText,
+                );
+              }
+              return const DashboardTotalsOverview();
+            },
+          ),
+        ),
         enableContentScroll: true,
         useIntrinsicTopHeight: true,
         child: Padding(

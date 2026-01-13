@@ -75,6 +75,67 @@ FilterApplyResult buildFilterApplyResult(DateRangeFilter res) {
   );
 }
 
+/// Small value object representing the analytics date range (ISO yyyy-MM-dd)
+class AnalyticsDateRange {
+  final String? startDate;
+  final String? endDate;
+
+  const AnalyticsDateRange({this.startDate, this.endDate});
+}
+
+/// Compute the analytics startDate/endDate based on the user's selection.
+/// - If a quick filter is chosen (today/thisWeek/thisMonth), we derive dates.
+/// - If a manual range is used, reuse the values from [result].
+AnalyticsDateRange buildAnalyticsDateRange(
+  DateRangeFilter res,
+  FilterApplyResult result,
+) {
+  // Manual range: reuse
+  if (!res.isQuick) {
+    return AnalyticsDateRange(
+      startDate: result.dateStart,
+      endDate: result.dateEnd,
+    );
+  }
+
+  final now = DateTime.now();
+  late DateTime start;
+  late DateTime end;
+
+  switch (res.quickType) {
+    case FilterQuickType.today:
+      start = DateTime(now.year, now.month, now.day);
+      end = DateTime(now.year, now.month, now.day);
+      break;
+    case FilterQuickType.thisWeek:
+      // Assume week starts on Monday
+      final int weekday = now.weekday; // Mon=1 ... Sun=7
+      start = DateTime(
+        now.year,
+        now.month,
+        now.day,
+      ).subtract(Duration(days: weekday - 1));
+      end = start.add(const Duration(days: 6));
+      break;
+    case FilterQuickType.thisMonth:
+      start = DateTime(now.year, now.month, 1);
+      final nextMonth =
+          (now.month == 12)
+              ? DateTime(now.year + 1, 1, 1)
+              : DateTime(now.year, now.month + 1, 1);
+      end = nextMonth.subtract(const Duration(days: 1));
+      break;
+    default:
+      start = DateTime(now.year, now.month, now.day);
+      end = DateTime(now.year, now.month, now.day);
+  }
+
+  return AnalyticsDateRange(
+    startDate: _formatYmd(start),
+    endDate: _formatYmd(end),
+  );
+}
+
 String _formatYmd(DateTime d) {
   final y = d.year.toString().padLeft(4, '0');
   final m = d.month.toString().padLeft(2, '0');

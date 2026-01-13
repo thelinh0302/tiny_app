@@ -1,5 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:finly_app/core/widgets/dashboard_totals_overview.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:finly_app/features/analytics/presentation/bloc/analytics_summary_bloc.dart';
 import 'package:flutter/material.dart';
 
 import 'package:finly_app/core/constants/app_images.dart';
@@ -59,7 +62,37 @@ class HomeHeader extends StatelessWidget {
             ),
           ],
         ),
-        const DashboardTotalsOverview(),
+        BlocProvider<AnalyticsSummaryBloc>(
+          create:
+              (_) =>
+                  Modular.get<AnalyticsSummaryBloc>()
+                    ..add(const AnalyticsSummaryRequested()),
+          child: BlocBuilder<AnalyticsSummaryBloc, AnalyticsSummaryState>(
+            builder: (context, state) {
+              if (state is AnalyticsSummaryLoadSuccess) {
+                final s = state.summary;
+                final balanceText = '\$' + s.balance.toStringAsFixed(2);
+                final expenseText = '\$' + s.expenseTotal.toStringAsFixed(2);
+                double progress = 0.0;
+                final denom = (s.incomeTotal + s.expenseTotal);
+                if (denom > 0) progress = (s.expenseTotal / denom).clamp(0, 1);
+                final clamped = progress.clamp(0.0, 1.0);
+                final percentage = (clamped * 100).round();
+                return DashboardTotalsOverview(
+                  totalBalanceTitle: 'Total Balance',
+                  totalBalanceAmount: balanceText,
+                  totalExpenseTitle: 'Total Expense',
+                  totalExpenseAmount: expenseText,
+                  progress: progress,
+                  progressAmountText: expenseText,
+                  subtitleText: '$percentage% of your expenses, looks good.',
+                );
+              }
+              // Loading/Failure fallback
+              return const DashboardTotalsOverview();
+            },
+          ),
+        ),
       ],
     );
   }

@@ -42,11 +42,28 @@ class TotalCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.verticalSmall),
-          Text(
-            amount,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: amountColor,
+          // Animate amount changes smoothly using AnimatedSwitcher (fade + slide)
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 350),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) {
+              final slide = Tween<Offset>(
+                begin: const Offset(0, 0.2),
+                end: Offset.zero,
+              ).animate(animation);
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(position: slide, child: child),
+              );
+            },
+            child: Text(
+              amount,
+              key: ValueKey<String>(amount),
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: amountColor,
+              ),
             ),
           ),
         ],

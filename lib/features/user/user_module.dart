@@ -1,4 +1,10 @@
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:finly_app/core/network/dio_client.dart';
+import 'package:finly_app/features/analytics/data/datasources/analytics_remote_data_source.dart';
+import 'package:finly_app/features/analytics/data/repositories/analytics_repository_impl.dart';
+import 'package:finly_app/features/analytics/domain/repositories/analytics_repository.dart';
+import 'package:finly_app/features/analytics/domain/usecases/get_analytics_summary.dart';
+import 'package:finly_app/features/analytics/presentation/bloc/analytics_summary_bloc.dart';
 import 'data/datasources/user_remote_data_source.dart';
 import 'data/repositories/user_repository_impl.dart';
 import 'domain/repositories/user_repository.dart';
@@ -15,6 +21,22 @@ class UserModule extends Module {
     // BLoC
     i.add<UserBloc>(
       () => UserBloc(getUser: i.get<GetUser>(), getUsers: i.get<GetUsers>()),
+    );
+
+    // Analytics summary dependencies for header totals in user pages
+    i.addLazySingleton<AnalyticsRemoteDataSource>(
+      () => AnalyticsRemoteDataSourceImpl(client: Modular.get<DioClient>()),
+    );
+    i.addLazySingleton<AnalyticsRepository>(
+      () => AnalyticsRepositoryImpl(remote: i.get<AnalyticsRemoteDataSource>()),
+    );
+    i.addLazySingleton<GetAnalyticsSummary>(
+      () => GetAnalyticsSummary(i.get<AnalyticsRepository>()),
+    );
+    i.add<AnalyticsSummaryBloc>(
+      () => AnalyticsSummaryBloc(
+        getAnalyticsSummary: i.get<GetAnalyticsSummary>(),
+      ),
     );
 
     // Use Cases

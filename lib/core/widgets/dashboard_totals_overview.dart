@@ -29,8 +29,8 @@ class DashboardTotalsOverview extends StatelessWidget {
     this.totalBalanceAmount = '0.000',
     this.totalExpenseTitle = 'Total Expense',
     this.totalExpenseAmount = '0.000',
-    this.progress = 0.3,
-    this.progressAmountText = '7,783.00',
+    this.progress = 0,
+    this.progressAmountText = '0',
     this.subtitleText = '30% of your expenses, looks good.',
   });
 

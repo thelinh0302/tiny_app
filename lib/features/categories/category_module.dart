@@ -26,6 +26,11 @@ import 'package:finly_app/features/categories/domain/usecases/create_category.da
 import 'package:finly_app/features/categories/presentation/bloc/add_category_bloc.dart';
 import 'package:finly_app/features/transactions/domain/usecases/create_transaction.dart';
 import 'package:finly_app/features/transactions/presentation/bloc/add_expense_bloc.dart';
+import 'package:finly_app/features/analytics/data/datasources/analytics_remote_data_source.dart';
+import 'package:finly_app/features/analytics/data/repositories/analytics_repository_impl.dart';
+import 'package:finly_app/features/analytics/domain/repositories/analytics_repository.dart';
+import 'package:finly_app/features/analytics/domain/usecases/get_analytics_summary.dart';
+import 'package:finly_app/features/analytics/presentation/bloc/analytics_summary_bloc.dart';
 
 /// Category feature module.
 ///
@@ -104,6 +109,22 @@ class CategoryModule extends Module {
     );
     i.add<AddExpenseBloc>(
       () => AddExpenseBloc(createTransaction: i.get<CreateTransaction>()),
+    );
+
+    // Analytics summary dependencies for header totals
+    i.addLazySingleton<AnalyticsRemoteDataSource>(
+      () => AnalyticsRemoteDataSourceImpl(client: Modular.get<DioClient>()),
+    );
+    i.addLazySingleton<AnalyticsRepository>(
+      () => AnalyticsRepositoryImpl(remote: i.get<AnalyticsRemoteDataSource>()),
+    );
+    i.addLazySingleton<GetAnalyticsSummary>(
+      () => GetAnalyticsSummary(i.get<AnalyticsRepository>()),
+    );
+    i.add<AnalyticsSummaryBloc>(
+      () => AnalyticsSummaryBloc(
+        getAnalyticsSummary: i.get<GetAnalyticsSummary>(),
+      ),
     );
   }
 
